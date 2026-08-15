@@ -1,6 +1,6 @@
 # windows-ocr
 
-A [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh) plugin that lets **text-only models** accept attached images: every image is recognized **locally** with the built-in Windows OCR engine (`Windows.Media.Ocr`) and only the recognized **text** is sent to the model API. **Image bytes never leave your machine.**
+[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh) plugin that lets **text-only models** accept attached images: every image is recognized **locally** with the built-in Windows OCR engine (`Windows.Media.Ocr`) and only the recognized **text** is sent to the model API. **Image bytes never leave your machine.**
 
 - No configuration changes to your models — no `input: [text, image]` hacks in `settings.yaml`.
 - Works with any provider/model in dsh; OCR applies only to text models.
