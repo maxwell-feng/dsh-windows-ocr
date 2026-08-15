@@ -7,6 +7,14 @@
 - 真正的视觉模型（本身声明支持图片）默认原样透传图片，不受影响。
 - 默认安全（fail-closed）：插件没加载时，模型保持纯文本，图片附件会被拒绝——不存在静默泄漏。
 
+## 让 AI agent 快速安装
+
+把这个仓库交给任何 AI agent，或直接粘贴下面的指令，agent 会替你完成安装与验证：
+
+> 请按照 <https://github.com/maxwell-feng/dsh-windows-ocr/blob/main/agents-install.md> 安装本仓库的 dsh 插件。执行每一项前置检查，选择一种安装方式，然后完成强制验证：在纯文本模型会话里附加一张图片，确认模型能答出图片中的文字。
+
+[`agents-install.md`](./agents-install.md) 是一份写给 AI agent 的分步手册：前置检查、两种安装方式（profile 永久 / `--patch` 临时）、强制功能验证，以及常见失败模式的排查。手动安装说明见下文。
+
 ## 为什么是插件而不是 skill
 
 dsh 的 skill 只是注入模型上下文的 Markdown 指令：不能执行代码、不能钩住请求管线、更拦不住图片被序列化上传。这个功能恰好需要这些，所以它是一个 cordis 插件，钩住 `llm` 服务的两个公开接缝：

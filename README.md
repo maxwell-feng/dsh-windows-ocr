@@ -7,6 +7,23 @@
 - Genuine vision models (declared image capability) pass images through untouched by default.
 - Fail-closed: if the plugin is not loaded, models stay text-only and image attachments are refused — nothing can silently leak.
 
+## Quick install via an AI agent
+
+Hand this repository to any AI agent, or paste the instruction below, and the
+agent will install and verify the plugin for you:
+
+> Please install the dsh plugin in this repository by following
+> <https://github.com/maxwell-feng/dsh-windows-ocr/blob/main/agents-install.md>.
+> Run every preflight check, choose an install mode, then complete the
+> mandatory verification: attach an image to a text-only model session and
+> confirm the model answers with the recognized text.
+
+[`agents-install.md`](./agents-install.md) is a step-by-step guide written for
+AI agents: preflight checks, both install modes (permanent profile patch /
+temporary `--patch` overlay), mandatory functional verification, and
+troubleshooting for the failure modes you are likely to hit. Manual install
+instructions are below.
+
 ## Why a plugin (not a skill)
 
 dsh skills are Markdown instruction files injected into the model context — they cannot execute code, cannot hook the request pipeline, and cannot stop an image from being serialized. This feature needs exactly that, so it is a cordis plugin that hooks two public seams of the `llm` service:
