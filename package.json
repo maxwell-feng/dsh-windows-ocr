@@ -1,16 +1,22 @@
 {
   "name": "windows-ocr",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "dsh plugin: recognize attached images with the built-in Windows OCR engine (Windows.Media.Ocr) and send only the recognized text to the model — image bytes never leave the machine.",
   "type": "module",
   "main": "lib/index.js",
   "files": [
     "lib",
+    "src",
     "cordis.patch.yml",
     "README.md",
     "README.zh-CN.md",
     "LICENSE"
   ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "tsc -p tsconfig.json",
+    "test": "node test/standalone-test.mjs"
+  },
   "keywords": [
     "dsh",
     "dsh-plugin",
@@ -20,6 +26,11 @@
     "privacy"
   ],
   "license": "MIT",
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"

@@ -32,13 +32,6 @@ you attach an image
 
 ## Install
 
-The official way to load a local plugin is a `--patch` overlay that references
-the plugin file by **absolute path** (see `docs/user/develop/basic`). On
-Windows the path must be a `file://` URL — a bare `C:/...` path is parsed as
-the `c:` URL scheme and the loader rejects it.
-
-## Install
-
 Two official ways to load this plugin, both referencing the plugin file by
 **absolute path** (see `docs/user/develop/basic`). On Windows the path must be
 a `file://` URL — a bare `C:/...` path is parsed as the `c:` URL scheme and
@@ -111,6 +104,16 @@ Each image block becomes a text block:
 ```
 
 Recognition text is cached per attachment id for the lifetime of the dsh process, so repeated turns do not re-run OCR.
+
+## Temp-file hygiene
+
+Every OCR run writes its input image and output text into a **fresh temporary
+directory** (`windows-ocr-*` under the system temp dir). The directory is
+removed automatically in `finally` — on success, on OCR error, and on timeout —
+so no per-run script, image, or output file survives. At plugin start, any
+orphaned `windows-ocr-*` directories left behind by a previously crashed
+process are swept as well. Nothing is written outside the plugin's own
+temporary directory and the dsh attachment store.
 
 ## Smoke test (no dsh needed)
 
