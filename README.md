@@ -1,0 +1,141 @@
+# windows-ocr
+
+A [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh) plugin that lets **text-only models** accept attached images: every image is recognized **locally** with the built-in Windows OCR engine (`Windows.Media.Ocr`) and only the recognized **text** is sent to the model API. **Image bytes never leave your machine.**
+
+- No configuration changes to your models — no `input: [text, image]` hacks in `settings.yaml`.
+- Works with any provider/model in dsh; OCR applies only to text models.
+- Genuine vision models (declared image capability) pass images through untouched by default.
+- Fail-closed: if the plugin is not loaded, models stay text-only and image attachments are refused — nothing can silently leak.
+
+## Why a plugin (not a skill)
+
+dsh skills are Markdown instruction files injected into the model context — they cannot execute code, cannot hook the request pipeline, and cannot stop an image from being serialized. This feature needs exactly that, so it is a cordis plugin that hooks two public seams of the `llm` service:
+
+1. **Capability shim** — `ctx.llm.resolveModelInfo` (also `listModels`). The host gates image attachments on `inputModalities.includes("image")` at three places: message admission, model switching, and the `read_image` tool. The shim answers "yes", so text models admit images.
+2. **Request rewrite** — `registration.adapter.stream` (the single choke point both `ctx.llm.stream` and `prepareCall().stream` funnel through). Every `image` content block is replaced with an OCR text block before the adapter serializes the request, so the adapter's own image check never fires, no attachment bytes are read for the wire, and no `image_url` is ever built.
+
+```
+you attach an image
+  → admission asks ctx.llm.resolveModelInfo (shimmed: "image" ✓)
+  → image stored in the local attachment store (session log, UI preview)
+  → agent builds the request → adapter.stream (wrapped)
+  → image block read locally (ctx.attachments.readImage) → Windows OCR
+  → block replaced with <image_ocr>…text…</image_ocr>
+  → adapter serializes a text-only request → provider
+```
+
+## Requirements
+
+- Windows 10/11 (Windows PowerShell 5.1+ ships with the OS; no install needed)
+- A Windows OCR-capable language pack for your language (Settings → Time & language → Language). English is usually present; Chinese requires the Chinese language pack (OCR-capable).
+- `dsh` with a profile (tested against dsh `0.1.0-rc.6`)
+
+## Install
+
+The official way to load a local plugin is a `--patch` overlay that references
+the plugin file by **absolute path** (see `docs/user/develop/basic`). On
+Windows the path must be a `file://` URL — a bare `C:/...` path is parsed as
+the `c:` URL scheme and the loader rejects it.
+
+## Install
+
+Two official ways to load this plugin, both referencing the plugin file by
+**absolute path** (see `docs/user/develop/basic`). On Windows the path must be
+a `file://` URL — a bare `C:/...` path is parsed as the `c:` URL scheme and
+the loader rejects it.
+
+### Permanent: profile patch layer
+
+Append to your profile's `cordis.patch.yml` (e.g. `~/.dsh/profiles/web/cordis.patch.yml`):
+
+```yaml
+- insert:
+    - id: windows-ocr
+      name: 'file:///C:/absolute/path/to/windows-ocr/lib/index.js'
+      config:
+        language: ''
+        passthrough: true
+```
+
+Then restart `dsh web`. Remove the rows to uninstall — nothing else is touched.
+
+### Temporary: `--patch` overlay
+
+Put the same rows in an overlay file and boot with it; your profile stays untouched:
+
+```bash
+dsh --profile web --patch C:/path/to/overlay.yml
+```
+
+### Notes
+
+- `dsh web` fails with `EADDRINUSE` on port 3080 when an older instance is
+  still running: find it with `netstat -ano | findstr :3080` and stop it
+  (taskkill /PID <pid> /F) before starting a new one.
+- For a packaged install (npm / tarball / `github:user/repo`), package the
+  plugin as a bundle (`dsh.bundle` + `cordis.patch.yml`, see
+  `docs/user/develop/basic/publish`); a git install additionally needs a
+  `prepare` build script and pnpm `allowBuilds` consent.
+
+To verify the plugin loaded, look for `windows-ocr` in the boot logs, or check the OCR smoke test below.
+
+## Configuration
+
+All settings live in the patch row `windows-ocr` (`cordis.patch.yml` here) and can be overridden from your profile's `cordis.patch.yml`:
+
+| Key | Default | Meaning |
+|---|---|---|
+| `language` | `""` | BCP-47 tag for Windows OCR, e.g. `zh-Hans`, `en-US`. Empty = user profile languages. |
+| `passthrough` | `true` | `true`: genuine vision models receive images untouched; `false`: OCR everything. |
+| `ocrScript` | bundled `lib/ocr.ps1` | Absolute path override for the PowerShell OCR script. |
+| `timeoutMs` | `60000` | Per-image OCR timeout. |
+| `maxCacheEntries` | `200` | Bound on the per-run OCR cache (keyed by attachment id). |
+
+Example override in `~/.dsh/profiles/web/cordis.patch.yml`:
+
+```yaml
+- update:
+    - id: windows-ocr
+      config:
+        language: zh-Hans
+```
+
+## How the model sees the image
+
+Each image block becomes a text block:
+
+```
+<image_ocr name="photo.png">
+…recognized lines…
+</image_ocr>
+```
+
+Recognition text is cached per attachment id for the lifetime of the dsh process, so repeated turns do not re-run OCR.
+
+## Smoke test (no dsh needed)
+
+```powershell
+# 1x1 PNG — exercises WinRT loading, language availability, recognition
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File lib/ocr.ps1 -ImagePath test.png -OutFile out.txt
+Get-Content out.txt
+```
+
+Exit code 0 with an empty/whitespace `out.txt` means the OCR engine works (a 1×1 image has no text). Exit 2/3 means a language pack is missing.
+
+## Verification inside dsh
+
+1. Attach an image to a text-model session and send a message — the model should answer using the recognized text.
+2. Confirm the image never goes out: open DevTools → Network in the web UI, inspect the request to your provider base URL, and verify the payload contains only `text` content parts (no `image_url` / data URI).
+
+## Limitations
+
+- OCR language availability depends on installed Windows language packs (script exits 2/3 and the plugin degrades to a placeholder text).
+- GIFs: Windows OCR recognizes the first frame.
+- Cache is per process; a long-lived session keeps OCR text cached, bounded by `maxCacheEntries`.
+- Hot reload (HMR) replaces adapters; the plugin re-wraps new adapters on `llm/adapters-updated`, but a full restart is the safe path after any dsh update.
+- The model picker may show text models without an "image" badge (cosmetic only — `listModels` is shimmed consistently).
+- If the OCR plugin is removed, image attachments to text models are refused again (fail-closed), not uploaded.
+
+## License
+
+MIT
