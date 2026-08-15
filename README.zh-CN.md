@@ -32,7 +32,11 @@ dsh 的 skill 只是注入模型上下文的 Markdown 指令：不能执行代�
 
 ## 安装
 
-## 安装
+### 让 AI agent 安装
+
+本仓库的 [`agents-install.md`](./agents-install.md) 是一份**写给 AI agent**（也适合细心的人工）的分步安装手册。把这份文档交给 agent——例如对它说"按照 https://github.com/maxwell-feng/dsh-windows-ocr 的 `agents-install.md` 安装这个插件"——agent 就能自主完成前置检查、安装、验证和故障排查。手册涵盖两种安装方式、必须做的功能验证（附加图片 → 模型回答 OCR 文字）以及常见的失败模式。
+
+### 手动安装
 
 两种官方加载方式，patch 行都用**绝对路径**指向插件文件（见 `docs/user/develop/basic`）。Windows 上路径必须是 `file://` URL——裸写 `C:/...` 会被解析成 `c:` URL scheme 而被 loader 拒绝。
 

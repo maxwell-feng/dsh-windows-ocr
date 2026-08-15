@@ -32,6 +32,19 @@ you attach an image
 
 ## Install
 
+### Installing via an AI agent
+
+[`agents-install.md`](./agents-install.md) in this repository is a
+step-by-step installation guide written **for AI agents** (and careful
+humans). Give it to an agent — e.g. "install this plugin per
+`agents-install.md` from https://github.com/maxwell-feng/dsh-windows-ocr" —
+and the agent can perform the preflight checks, install, verification, and
+troubleshooting on its own. The guide covers both install modes, the
+mandatory functional verification (attach an image → model answers with the
+OCR text), and the failure modes you are likely to hit.
+
+### Manual install
+
 Two official ways to load this plugin, both referencing the plugin file by
 **absolute path** (see `docs/user/develop/basic`). On Windows the path must be
 a `file://` URL — a bare `C:/...` path is parsed as the `c:` URL scheme and
