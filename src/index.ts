@@ -238,6 +238,9 @@ export function apply(ctx: Context, config: Config = {}): void {
     const imagePath = join(dir, `input.${EXT_BY_MEDIA[mediaType] ?? "png"}`);
     const outPath = join(dir, "out.txt");
     try {
+      // Security: fixed filename inside a fresh mkdtemp dir; the extension
+      // comes from the EXT_BY_MEDIA whitelist with a png fallback. No
+      // user-controlled path reaches here.
       await fs.writeFile(imagePath, bytes);
       await new Promise<void>((resolve, reject) => {
         const args = [
@@ -248,6 +251,10 @@ export function apply(ctx: Context, config: Config = {}): void {
           "-OutFile", outPath,
         ];
         if (language) args.push("-Language", language);
+        // Security: argv-array spawn without a shell — no command injection.
+        // The binary and every argument come from admin configuration and
+        // mkdtemp paths, never from model or attachment content. Do not
+        // switch to a string command or `shell: true`.
         const child = spawn("powershell.exe", args, {
           windowsHide: true,
           stdio: ["ignore", "ignore", "pipe"],
