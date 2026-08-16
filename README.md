@@ -1,11 +1,13 @@
 # windows-ocr
 
-[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh) plugin that lets **text-only models** accept attached images: every image is recognized **locally** with the built-in Windows OCR engine (`Windows.Media.Ocr`) and only the recognized **text** is sent to the model API. **Image bytes never leave your machine.**
+[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh) plugin that lets **text-only models** accept attached images: every image is recognized **locally** with the built-in Windows OCR engine (`Windows.Media.Ocr`) and only the recognized **text** is sent to the model API.
+
+**Privacy default:** image bytes are OCR'd locally and not sent to the provider. Set `passthrough: true` only if you intentionally want genuine vision models to receive original image bytes.
 
 - No configuration changes to your models — no `input: [text, image]` hacks in `settings.yaml`.
-- Works with any provider/model in dsh; OCR applies only to text models.
-- Genuine vision models (declared image capability) pass images through untouched by default.
-- Fail-closed: if the plugin is not loaded, models stay text-only and image attachments are refused — nothing can silently leak.
+- Works with any provider/model in dsh; by default every attached image is OCR'd before the request leaves the machine.
+- Vision-model passthrough is **opt-in** (`passthrough: true`).
+- Fail-closed: if the plugin is not loaded, models stay text-only and image attachments are refused — nothing can silently leak. Missing attachments are replaced with a refusal text block (never left as raw `image`).
 
 ## Quick install via an AI agent
 
@@ -77,10 +79,10 @@ Append to your profile's `cordis.patch.yml` (e.g. `~/.dsh/profiles/web/cordis.pa
       name: 'file:///C:/absolute/path/to/windows-ocr/lib/index.js'
       config:
         language: ''
-        passthrough: true
+        passthrough: false
 ```
 
-Then restart `dsh web`. Remove the rows to uninstall — nothing else is touched.
+Then restart `dsh web`. Remove the rows to uninstall — the plugin restores the original `llm` / adapter methods on unload.
 
 ### Temporary: `--patch` overlay
 
@@ -109,7 +111,7 @@ All settings live in the patch row `windows-ocr` (`cordis.patch.yml` here) and c
 | Key | Default | Meaning |
 |---|---|---|
 | `language` | `""` | BCP-47 tag for Windows OCR, e.g. `zh-Hans`, `en-US`. Empty = user profile languages. |
-| `passthrough` | `true` | `true`: genuine vision models receive images untouched; `false`: OCR everything. |
+| `passthrough` | `false` | `false` (default): OCR every image. `true`: genuine vision models receive images untouched. |
 | `ocrScript` | bundled `lib/ocr.ps1` | Absolute path override for the PowerShell OCR script. |
 | `timeoutMs` | `60000` | Per-image OCR timeout. |
 | `maxCacheEntries` | `200` | Bound on the per-run OCR cache (keyed by attachment id). |
@@ -125,10 +127,10 @@ Example override in `~/.dsh/profiles/web/cordis.patch.yml`:
 
 ## How the model sees the image
 
-Each image block becomes a text block:
+Each image block becomes a text block (local filenames are **not** forwarded):
 
 ```
-<image_ocr name="photo.png">
+<image_ocr>
 …recognized lines…
 </image_ocr>
 ```

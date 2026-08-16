@@ -1,7 +1,7 @@
 {
-  "name": "windows-ocr",
-  "version": "0.2.0",
-  "description": "dsh plugin: recognize attached images with the built-in Windows OCR engine (Windows.Media.Ocr) and send only the recognized text to the model — image bytes never leave the machine.",
+  "name": "@maxwell-feng/dsh-windows-ocr",
+  "version": "0.2.1",
+  "description": "dsh plugin: recognize attached images with the built-in Windows OCR engine (Windows.Media.Ocr) and send only the recognized text to the model. Text models never receive image bytes; vision passthrough is opt-in.",
   "type": "module",
   "main": "lib/index.js",
   "files": [
@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "tsc -p tsconfig.json",
-    "test": "node test/standalone-test.mjs"
+    "test": "npm run build && node test/standalone-test.mjs"
   },
   "keywords": [
     "dsh",
@@ -26,10 +26,17 @@
     "privacy"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maxwell-feng/dsh-windows-ocr.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@types/node": "^26.2.0",
-    "typescript": "^7.0.2"
+    "@deepseek-ai/cordis": "4.0.1",
+    "@types/node": "26.2.0",
+    "typescript": "5.8.2"
   },
   "dsh": {
     "bundle": {

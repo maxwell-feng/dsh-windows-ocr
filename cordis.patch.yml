@@ -2,14 +2,14 @@
 # "last write wins per row" — no other bundle targets the `windows-ocr` id.
 - insert:
     - id: windows-ocr
-      name: 'windows-ocr'
+      name: '@maxwell-feng/dsh-windows-ocr'
       config:
         # BCP-47 language tag for Windows OCR, e.g. "zh-Hans", "en-US".
         # Empty (default): use the user profile languages.
         language: ''
-        # True (default): genuine vision models receive images untouched.
-        # False: every image goes through OCR, regardless of model capability.
-        passthrough: true
+        # Privacy-first default: every image is OCR'd. Set true only when you
+        # intentionally want genuine vision models to receive original bytes.
+        passthrough: false
         # Per-image OCR timeout in milliseconds.
         timeoutMs: 60000
         # Max cached OCR results (keyed by attachment id) to bound memory.

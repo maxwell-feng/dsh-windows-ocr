@@ -3,4 +3,3 @@ node_modules/
 .DS_Store
 .mimosa/
 dev.patch.yml
-package-lock.json

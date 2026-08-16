@@ -1,11 +1,13 @@
 # windows-ocr
 
-一个 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（dsh）插件：让**纯文本模型**也能"看"附件图片——图片在**本机**用 Windows 自带 OCR 引擎（`Windows.Media.Ocr`）识别，只有识别出的**文字**会发给模型 API。**图片字节永远不会离开你的电脑。**
+一个 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（dsh）插件：让**纯文本模型**也能"看"附件图片——图片在**本机**用 Windows 自带 OCR 引擎（`Windows.Media.Ocr`）识别，只有识别出的**文字**会发给模型 API。
+
+**隐私默认**：图片字节在本机 OCR，不会发给服务商。只有当你明确想让真正的视觉模型接收原图时，才设置 `passthrough: true`。
 
 - 不需要改任何模型配置——不用在 `settings.yaml` 里给模型加 `input: [text, image]`。
-- 对 dsh 里的任何 provider/模型通用；OCR 只作用于文本模型。
-- 真正的视觉模型（本身声明支持图片）默认原样透传图片，不受影响。
-- 默认安全（fail-closed）：插件没加载时，模型保持纯文本，图片附件会被拒绝——不存在静默泄漏。
+- 对 dsh 里的任何 provider/模型通用；默认所有附件图片在出站前都会先 OCR。
+- 视觉模型透传是**可选开启**的（`passthrough: true`）。
+- 默认安全（fail-closed）：插件没加载时，模型保持纯文本，图片附件会被拒绝——不存在静默泄漏；缺失 attachment 的图片块会被替换为拒绝文本，绝不会以原始 `image` 块保留。
 
 ## 让 AI agent 快速安装
 
@@ -58,10 +60,10 @@ dsh 的 skill 只是注入模型上下文的 Markdown 指令：不能执行代�
       name: 'file:///C:/绝对路径/windows-ocr/lib/index.js'
       config:
         language: ''
-        passthrough: true
+        passthrough: false
 ```
 
-然后重启 `dsh web`。删掉这几行即卸载，不残留任何东西。
+然后重启 `dsh web`。删掉这几行即卸载——插件在卸载时会恢复被替换的 `llm`/adapter 原方法。
 
 ### 临时加载：`--patch` overlay
 
@@ -85,7 +87,7 @@ dsh --profile web --patch C:/path/to/overlay.yml
 | 键 | 默认 | 含义 |
 |---|---|---|
 | `language` | `""` | Windows OCR 的 BCP-47 语言标签，如 `zh-Hans`、`en-US`；空 = 用户配置文件语言 |
-| `passthrough` | `true` | `true`：真视觉模型图片原样透传；`false`：所有图片一律走 OCR |
+| `passthrough` | `false` | `false`（默认）：所有图片一律走 OCR；`true`：真视觉模型图片原样透传 |
 | `ocrScript` | 自带 `lib/ocr.ps1` | PowerShell OCR 脚本的绝对路径覆盖 |
 | `timeoutMs` | `60000` | 单张图片 OCR 超时（毫秒） |
 | `maxCacheEntries` | `200` | 单次运行 OCR 缓存上限（按附件 id） |
@@ -101,10 +103,10 @@ dsh --profile web --patch C:/path/to/overlay.yml
 
 ## 模型看到什么
 
-每个图片块变成一个文本块：
+每个图片块变成一个文本块（**不转发本地文件名**）：
 
 ```
-<image_ocr name="photo.png">
+<image_ocr>
 …识别出的文字行…
 </image_ocr>
 ```

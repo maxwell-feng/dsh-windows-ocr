@@ -11,10 +11,10 @@ attached image.
 - Lets **text-only models** accept attached images: each image is recognized
   **locally** with the built-in Windows OCR engine (`Windows.Media.Ocr`), and
   only the recognized text is sent to the model API.
-- **Image bytes never leave the machine.** Fail-closed: if the plugin is not
-  loaded, image attachments are refused (never uploaded).
-- Genuine vision models pass images through untouched by default
-  (`passthrough: true`).
+- **Privacy default:** image bytes are OCR'd locally and not sent to the
+  provider. Fail-closed: if the plugin is not loaded, image attachments are
+  refused (never uploaded).
+- Vision-model passthrough is **opt-in** (`passthrough: true`).
 - Do **not** enable together with `tesseract-ocr` on the same machine — both
   would OCR the same image.
 
@@ -50,7 +50,7 @@ the `c:` URL scheme and the loader rejects it with
          name: 'file:///C:/absolute/path/to/windows-ocr/lib/index.js'
          config:
            language: ''
-           passthrough: true
+           passthrough: false
            timeoutMs: 60000
            maxCacheEntries: 200
    ```
@@ -112,15 +112,16 @@ dsh --profile web --patch C:/absolute/path/to/dev.patch.yml
 ## 5. Uninstall
 
 Remove the `windows-ocr` rows from `cordis.patch.yml` (or stop passing the
-overlay) and restart dsh. Nothing else is touched; models return to
-text-only and image attachments are refused again (fail-closed).
+overlay) and restart dsh. The plugin restores the original `llm` / adapter
+methods on unload; models return to text-only and image attachments are
+refused again (fail-closed).
 
 ## 6. Configuration reference
 
 | Key | Default | Meaning |
 |---|---|---|
 | `language` | `""` | BCP-47 tag for Windows OCR (`zh-Hans`, `en-US`, …); empty = user profile languages |
-| `passthrough` | `true` | `true`: vision models receive images untouched; `false`: OCR everything |
+| `passthrough` | `false` | `false` (default): OCR every image; `true`: vision models receive images untouched |
 | `ocrScript` | bundled `lib/ocr.ps1` | absolute path to the PowerShell OCR script |
 | `timeoutMs` | `60000` | per-image OCR timeout |
 | `maxCacheEntries` | `200` | OCR cache bound (keyed by attachment id) |
@@ -135,23 +136,25 @@ Orphaned directories from a crashed process are swept at plugin start.
 
 The dsh.so submission checker (https://www.dsh.so/zh/submit) runs automated
 static heuristics and attaches the report to the submission Issue for human
-review. It is expected to flag this plugin with 2 Critical
-(`node:child_process`) and 2 Warning (`fs.writeFile`) findings. Those are
-**existence checks, not vulnerabilities in context**; paste the note below
-into the submission so the reviewer can close them:
+review. It is expected to flag this plugin with Critical findings for
+`node:child_process` usage and Warning findings for `fs.writeFile` (exact
+counts vary with the scanned version). Those are **existence checks, not
+vulnerabilities in context**; paste the note below into the submission so the
+reviewer can close them:
 
-> **Security note for the automated scan findings (2 Critical / 2 Warning):**
+> **Security note for the automated scan findings (Critical `node:child_process` / Warning `fs.writeFile`):**
 > Both findings are static existence checks, not vulnerabilities in context:
 > - `node:child_process` (Critical): the plugin must spawn the OCR engine
 >   (`powershell.exe`). The spawn call uses an **argv array without a shell**,
 >   so there is no command-injection surface; the binary and all arguments
 >   come from admin-controlled config and `mkdtemp`-generated temp paths —
->   never from model or attachment content.
+>   never from model or attachment content. On timeout the child is terminated
+>   (`taskkill /t /f` on Windows) and awaited before cleanup.
 > - `fs.writeFile` (Warning): the plugin writes the image to a fixed filename
 >   inside a **fresh `mkdtemp` directory**; the extension comes from a
 >   whitelist map with a `png` fallback. No user-controlled path reaches the
 >   write.
-> Every temp directory is removed in `finally` (success/error/timeout) and
-> orphaned dirs are swept at startup. The plugin makes **no network requests**
-> and has **zero runtime dependencies**. Independent deep audit (Mimosa):
-> 0 findings, 0 vulnerable packages.
+> Every temp directory is removed in `finally` (success/error/timeout, after
+> the child exits) and orphaned dirs are swept at startup. The plugin makes
+> **no network requests** and has **zero runtime dependencies**. Independent
+> deep audit (Mimosa): 0 findings, 0 vulnerable packages.
