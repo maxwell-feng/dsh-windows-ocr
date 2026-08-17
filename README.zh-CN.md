@@ -14,10 +14,10 @@
 ## npm 安装
 
 ```bash
-dsh plugin add @maxwell-feng/dsh-windows-ocr
+dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
 ```
 
-预编译发布（含 Sigstore provenance），无需源码构建或 `allowBuilds` 授权。从本仓库源码安装仍可用下方 agent 指南或手动步骤。
+（把 `web` 换成你的 profile，如 `tui`。）预编译发布（含 Sigstore provenance），无需源码构建或 `allowBuilds` 授权。从本仓库源码安装仍可用下方 agent 指南或手动步骤。
 
 ## 让 AI agent 快速安装
 
