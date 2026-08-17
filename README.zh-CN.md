@@ -1,5 +1,7 @@
 # windows-ocr
 
+[![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com)
+
 一个 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（dsh）插件：让**纯文本模型**也能"看"附件图片——图片在**本机**用 Windows 自带 OCR 引擎（`Windows.Media.Ocr`）识别，只有识别出的**文字**会发给模型 API。
 
 **隐私默认**：图片字节在本机 OCR，不会发给服务商。只有当你明确想让真正的视觉模型接收原图时，才设置 `passthrough: true`。
