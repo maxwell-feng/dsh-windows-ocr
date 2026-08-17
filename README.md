@@ -11,6 +11,14 @@
 - Vision-model passthrough is **opt-in** (`passthrough: true`).
 - Fail-closed: if the plugin is not loaded, models stay text-only and image attachments are refused — nothing can silently leak. Missing attachments are replaced with a refusal text block (never left as raw `image`).
 
+## Install from npm
+
+```bash
+dsh plugin add @maxwell-feng/dsh-windows-ocr
+```
+
+Prebuilt and published with Sigstore provenance — no source build or `allowBuilds` approval needed. Installing from source (this repo) still works via the agent guide or the manual steps below.
+
 ## Quick install via an AI agent
 
 Hand this repository to any AI agent, or paste the instruction below, and the
