@@ -11,6 +11,14 @@
 - 视觉模型透传是**可选开启**的（`passthrough: true`）。
 - 默认安全（fail-closed）：插件没加载时，模型保持纯文本，图片附件会被拒绝——不存在静默泄漏；缺失 attachment 的图片块会被替换为拒绝文本，绝不会以原始 `image` 块保留。
 
+## npm 安装
+
+```bash
+dsh plugin add @maxwell-feng/dsh-windows-ocr
+```
+
+预编译发布（含 Sigstore provenance），无需源码构建或 `allowBuilds` 授权。从本仓库源码安装仍可用下方 agent 指南或手动步骤。
+
 ## 让 AI agent 快速安装
 
 把这个仓库交给任何 AI agent，或直接粘贴下面的指令，agent 会替你完成安装与验证：
