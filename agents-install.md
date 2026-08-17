@@ -22,7 +22,7 @@ attached image.
 
 | Check | Command | Must see |
 |---|---|---|
-| dsh installed | `dsh --version` | a version like `0.1.0-rc.6` |
+| dsh installed | `dsh --version` | a version like `0.1.0-rc.7` or newer |
 | profile exists | `ls ~/.dsh/profiles` | at least one profile (e.g. `web`) |
 | profile boots/composes | `dsh --profile web --dump-config` | succeeds, prints rows |
 | OS | `ver` or PowerShell `$PSVersionTable` | Windows 10/11 |
@@ -57,7 +57,24 @@ the `c:` URL scheme and the loader rejects it with
 
    If `dsh --profile web --dump-config | findstr windows-ocr` already shows a
    `windows-ocr` row, do **not** insert a second one (the loader rejects
-   duplicate ids) — use an `- update:` entry for that id instead.
+   duplicate ids — dsh `0.1.0-rc.7` fails the boot with
+   `duplicate loader entry id: windows-ocr`) — use an id-targeted override row
+   for that id instead:
+
+   ```yaml
+   - id: windows-ocr
+     config:
+       language: ''
+       passthrough: false
+       timeoutMs: 60000
+       maxCacheEntries: 200
+   ```
+
+   A `windows-ocr` row already exists whenever the plugin was installed from
+   npm (`dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr`) — the
+   package's own bundle patch inserts it. Pick **one** install method (npm
+   bundle **or** the manual insert above); combining both registers the same
+   entry id twice and dsh refuses to boot.
 3. Verify composition: `dsh --profile web --dump-config` — the row must appear
    under the `# == .../cordis.patch.yml` layer.
 4. Restart the dsh web server: stop any running instance, then `dsh web`.
@@ -101,7 +118,7 @@ dsh --profile web --patch C:/absolute/path/to/dev.patch.yml
 | Symptom | Cause | Fix |
 |---|---|---|
 | `EADDRINUSE` on 127.0.0.1:3080 | an older dsh instance still runs | `netstat -ano \| findstr :3080`, stop that PID (`taskkill /PID <pid> /F`), start again |
-| `duplicate loader entry id: windows-ocr` | the row already exists (profile patch + `--patch` overlay both add it) | use `- update:` for the existing id, or drop the overlay |
+| `duplicate loader entry id: windows-ocr` | the row already exists (npm bundle + manual insert, or profile patch + `--patch` overlay both add it) | use an id-targeted override row for the existing id (or drop the overlay / the manual insert — keep one install method) |
 | `ERR_UNSUPPORTED_ESM_URL_SCHEME ... Received protocol 'c:'` | Windows path written as `C:/...` instead of a URL | use `file:///C:/...` in the `name:` field |
 | `MISSING_CREDENTIAL: no API key for provider route ...` | the provider has no key | store `DEEPSEEK_API_KEY` (or the route's key) via the web Models page, or export it in the launching environment |
 | `dsh` refuses to start: `credentials-local: ... .credentials.yaml is readable beyond its owner (mode 664)` | credential file permissions | `chmod 600 ~/.dsh/.credentials.yaml` (on Windows, ensure the file is owner-only) |
