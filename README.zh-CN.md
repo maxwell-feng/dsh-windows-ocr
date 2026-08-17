@@ -19,6 +19,8 @@ dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
 
 （把 `web` 换成你的 profile，如 `tui`。）预编译发布（含 Sigstore provenance），无需源码构建或 `allowBuilds` 授权。从本仓库源码安装仍可用下方 agent 指南或手动步骤。
 
+> **npm 安装会自行注册 `windows-ocr` 这一行。** 该包自带 bundle 补丁（`dsh.bundle` + 它自己的 `cordis.patch.yml`），已经插入了 `windows-ocr` 这个 loader 条目。请**不要**再往 profile 里手动 `- insert:` 一行同 id 的条目——dsh `0.1.0-rc.7`（cordis-plugin-loader `1.0.2`）会拒绝重复的 loader 条目 id，`dsh web` 会以 `duplicate loader entry id: windows-ocr` 启动失败。
+
 ## 让 AI agent 快速安装
 
 把这个仓库交给任何 AI agent，或直接粘贴下面的指令，agent 会替你完成安装与验证：
@@ -48,7 +50,7 @@ dsh 的 skill 只是注入模型上下文的 Markdown 指令：不能执行代�
 
 - Windows 10/11（自带 Windows PowerShell 5.1，无需安装任何东西）
 - 你所用语言对应的 OCR 语言包（设置 → 时间和语言 → 语言）。英文一般自带；中文需要安装中文语言包（含 OCR 能力）。
-- 已安装 `dsh` 及 profile（在 dsh `0.1.0-rc.6` 上验证）
+- 已安装 `dsh` 及 profile（在 dsh `0.1.0-rc.7` 上验证）
 
 ## 安装
 
@@ -74,6 +76,8 @@ dsh 的 skill 只是注入模型上下文的 Markdown 指令：不能执行代�
 ```
 
 然后重启 `dsh web`。删掉这几行即卸载——插件在卸载时会恢复被替换的 `llm`/adapter 原方法。
+
+> **两种加载方式二选一**：npm bundle（上文）**或**这里的手动 insert——绝不能同时用。两者注册的是同一个 `windows-ocr` 条目 id，而 dsh `0.1.0-rc.7` 在行重复出现时会以 `duplicate loader entry id: windows-ocr` 拒绝启动。如果这一行已经存在（例如已按 npm bundle 方式安装），请用下方的按 id 覆盖方式改配置，而不是再插入一行。
 
 ### 临时加载：`--patch` overlay
 
@@ -102,13 +106,12 @@ dsh --profile web --patch C:/path/to/overlay.yml
 | `timeoutMs` | `60000` | 单张图片 OCR 超时（毫秒） |
 | `maxCacheEntries` | `200` | 单次运行 OCR 缓存上限（按附件 id） |
 
-覆盖示例（`~/.dsh/profiles/web/cordis.patch.yml`）：
+覆盖示例（`~/.dsh/profiles/web/cordis.patch.yml`）——用**按 id 覆盖**的行（不是 `insert:`）替换 `windows-ocr` 这一行的 config：
 
 ```yaml
-- update:
-    - id: windows-ocr
-      config:
-        language: zh-Hans
+- id: windows-ocr
+  config:
+    language: zh-Hans
 ```
 
 ## 模型看到什么

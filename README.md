@@ -19,6 +19,13 @@ dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
 
 (Replace `web` with your profile, e.g. `tui`.) Prebuilt and published with Sigstore provenance — no source build or `allowBuilds` approval needed. Installing from source (this repo) still works via the agent guide or the manual steps below.
 
+> **npm install registers the `windows-ocr` row by itself.** The package ships
+> a bundle patch (`dsh.bundle` + its own `cordis.patch.yml`) that inserts the
+> `windows-ocr` loader entry. Do **not** also add a manual `- insert:` row with
+> the same id to your profile — dsh `0.1.0-rc.7` (cordis-plugin-loader
+> `1.0.2`) rejects duplicate loader entry ids and `dsh web` fails to boot with
+> `duplicate loader entry id: windows-ocr`.
+
 ## Quick install via an AI agent
 
 Hand this repository to any AI agent, or paste the instruction below, and the
@@ -57,7 +64,7 @@ you attach an image
 
 - Windows 10/11 (Windows PowerShell 5.1+ ships with the OS; no install needed)
 - A Windows OCR-capable language pack for your language (Settings → Time & language → Language). English is usually present; Chinese requires the Chinese language pack (OCR-capable).
-- `dsh` with a profile (tested against dsh `0.1.0-rc.6`)
+- `dsh` with a profile (tested against dsh `0.1.0-rc.7`)
 
 ## Install
 
@@ -94,6 +101,13 @@ Append to your profile's `cordis.patch.yml` (e.g. `~/.dsh/profiles/web/cordis.pa
 
 Then restart `dsh web`. Remove the rows to uninstall — the plugin restores the original `llm` / adapter methods on unload.
 
+> Choose **one** way to load the plugin: the npm bundle (above) **or** this
+> manual insert — never both. Both register the same `windows-ocr` entry id,
+> and dsh `0.1.0-rc.7` fails the boot with `duplicate loader entry id:
+> windows-ocr` when the row exists twice. If the row is already present (for
+> example after an npm bundle install), configure it with an id-targeted
+> override (see Configuration below) instead of inserting a second row.
+
 ### Temporary: `--patch` overlay
 
 Put the same rows in an overlay file and boot with it; your profile stays untouched:
@@ -126,13 +140,13 @@ All settings live in the patch row `windows-ocr` (`cordis.patch.yml` here) and c
 | `timeoutMs` | `60000` | Per-image OCR timeout. |
 | `maxCacheEntries` | `200` | Bound on the per-run OCR cache (keyed by attachment id). |
 
-Example override in `~/.dsh/profiles/web/cordis.patch.yml`:
+Example override in `~/.dsh/profiles/web/cordis.patch.yml` — an id-targeted
+row (not `insert:`) replaces the existing `windows-ocr` row's config:
 
 ```yaml
-- update:
-    - id: windows-ocr
-      config:
-        language: zh-Hans
+- id: windows-ocr
+  config:
+    language: zh-Hans
 ```
 
 ## How the model sees the image
