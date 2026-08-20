@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.2.4] - 2026-08-20
+
+### Compatibility
+
+- **Adapted to deepseek-harness `0.1.0-rc.8`**: plugin code verified against
+  the rc.8 `llm` service (`resolveModelInfo` / `listModels` /
+  `adapter.stream` / `llm/adapters-updated`) and `attachments` service
+  (`readImage`) — all unchanged from rc.7, as are the vendored cordis
+  (`4.0.1`) and cordis-plugin-loader (`1.0.2`) — no code changes required.
+  Configuration and install docs now target `0.1.0-rc.8`.
+- rc.8 additions verified as non-interfering: the local attachment store's
+  new per-side admission limit (`maxImageDimension`, default 2000px) and
+  reduced default image byte limit (3.5MB) only gate what is admitted to the
+  store; the harness-side request image offload (`offloadRequestImages`) only
+  applies to vision-model passthrough, which this plugin leaves untouched by
+  default.
+
 ## [0.2.3] - 2026-08-17
 
 ### Compatibility
