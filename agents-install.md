@@ -22,7 +22,7 @@ attached image.
 
 | Check | Command | Must see |
 |---|---|---|
-| dsh installed | `dsh --version` | a version like `0.1.0-rc.8` or newer |
+| dsh installed | `dsh --version` | a version like `0.1.1-rc.1` or newer |
 | profile exists | `ls ~/.dsh/profiles` | at least one profile (e.g. `web`) |
 | profile boots/composes | `dsh --profile web --dump-config` | succeeds, prints rows |
 | OS | `ver` or PowerShell `$PSVersionTable` | Windows 10/11 |
@@ -57,7 +57,7 @@ the `c:` URL scheme and the loader rejects it with
 
    If `dsh --profile web --dump-config | findstr windows-ocr` already shows a
    `windows-ocr` row, do **not** insert a second one (the loader rejects
-   duplicate ids — dsh `0.1.0-rc.8` fails the boot with
+   duplicate ids — dsh `0.1.1-rc.1` fails the boot with
    `duplicate loader entry id: windows-ocr`) — use an id-targeted override row
    for that id instead:
 

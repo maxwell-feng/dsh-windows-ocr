@@ -19,7 +19,7 @@ dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
 
 （把 `web` 换成你的 profile，如 `tui`。）预编译发布（含 Sigstore provenance），无需源码构建或 `allowBuilds` 授权。从本仓库源码安装仍可用下方 agent 指南或手动步骤。
 
-> **npm 安装会自行注册 `windows-ocr` 这一行。** 该包自带 bundle 补丁（`dsh.bundle` + 它自己的 `cordis.patch.yml`），已经插入了 `windows-ocr` 这个 loader 条目。请**不要**再往 profile 里手动 `- insert:` 一行同 id 的条目——dsh `0.1.0-rc.8`（cordis-plugin-loader `1.0.2`）会拒绝重复的 loader 条目 id，`dsh web` 会以 `duplicate loader entry id: windows-ocr` 启动失败。
+> **npm 安装会自行注册 `windows-ocr` 这一行。** 该包自带 bundle 补丁（`dsh.bundle` + 它自己的 `cordis.patch.yml`），已经插入了 `windows-ocr` 这个 loader 条目。请**不要**再往 profile 里手动 `- insert:` 一行同 id 的条目——dsh `0.1.1-rc.1`（cordis-plugin-loader `1.0.2`）会拒绝重复的 loader 条目 id，`dsh web` 会以 `duplicate loader entry id: windows-ocr` 启动失败。
 
 ## 让 AI agent 快速安装
 
@@ -50,7 +50,7 @@ dsh 的 skill 只是注入模型上下文的 Markdown 指令：不能执行代�
 
 - Windows 10/11（自带 Windows PowerShell 5.1，无需安装任何东西）
 - 你所用语言对应的 OCR 语言包（设置 → 时间和语言 → 语言）。英文一般自带；中文需要安装中文语言包（含 OCR 能力）。
-- 已安装 `dsh` 及 profile（在 dsh `0.1.0-rc.8` 上验证）
+- 已安装 `dsh` 及 profile（在 dsh `0.1.1-rc.1` 上验证）
 
 ## 安装
 
@@ -77,7 +77,7 @@ dsh 的 skill 只是注入模型上下文的 Markdown 指令：不能执行代�
 
 然后重启 `dsh web`。删掉这几行即卸载——插件在卸载时会恢复被替换的 `llm`/adapter 原方法。
 
-> **两种加载方式二选一**：npm bundle（上文）**或**这里的手动 insert——绝不能同时用。两者注册的是同一个 `windows-ocr` 条目 id，而 dsh `0.1.0-rc.8` 在行重复出现时会以 `duplicate loader entry id: windows-ocr` 拒绝启动。如果这一行已经存在（例如已按 npm bundle 方式安装），请用下方的按 id 覆盖方式改配置，而不是再插入一行。
+> **两种加载方式二选一**：npm bundle（上文）**或**这里的手动 insert——绝不能同时用。两者注册的是同一个 `windows-ocr` 条目 id，而 dsh `0.1.1-rc.1` 在行重复出现时会以 `duplicate loader entry id: windows-ocr` 拒绝启动。如果这一行已经存在（例如已按 npm bundle 方式安装），请用下方的按 id 覆盖方式改配置，而不是再插入一行。
 
 ### 临时加载：`--patch` overlay
 
@@ -113,6 +113,43 @@ dsh --profile web --patch C:/path/to/overlay.yml
   config:
     language: zh-Hans
 ```
+
+## 图片路由：本地 OCR 还是视觉透传
+
+决定"附件图片是否离开本机"的唯一开关，是 `windows-ocr` 配置行里的 `passthrough`。
+
+- `passthrough: false`（默认，隐私优先）：每张图都用 Windows OCR 在本地识别，只把识别出的文字发给模型。图片字节**不离开本机**。
+- `passthrough: true`：对**原生**支持图片的模型，原图字节原样直传，真正的多模态（视觉）模型就能"看到"这张图。纯文本模型仍会被本地 OCR（fail-closed，见下）。
+
+### 路由决策矩阵
+
+| 模型 | `passthrough` | 图片去向 |
+|---|---|---|
+| 多模态 / 视觉模型 | `true` | 服务商，原图直传（模型看图）|
+| 多模态 / 视觉模型 | `false` | 本地 Windows OCR，只发文字 |
+| 纯文本模型 | `true` | 本地 Windows OCR（模型无视觉能力，fail-closed）|
+| 纯文本模型 | `false` | 本地 Windows OCR（默认）|
+
+### 为什么 `passthrough: true` 不一定把图发出去
+
+本插件会 shim `resolveModelInfo` / `listModels`，让**所有**模型都"看起来"支持 `image`——这正是 dsh 能接收图片附件的前提。但真正的路由用的是模型的**原生**能力（`nativeImageSupport`，走未被 shim 包裹的原始 `resolveModelInfo`）再加上 `passthrough`：
+
+- 视觉模型 + `passthrough: true` → 原图出站；
+- 文本模型 + `passthrough: true` → 仍然 OCR，因为模型根本消费不了图片。这是有意的 fail-closed 行为，不是 bug。
+
+### 怎么改
+
+包里默认 `passthrough: false`。要开启视觉透传，用**以 id 定向**的行覆盖你 profile 的 `cordis.patch.yml`（不要用 `insert:`，否则会重复注册同一个 id，启动报 `duplicate loader entry id: windows-ocr` 失败）：
+
+```yaml
+# ~/.dsh/profiles/web/cordis.patch.yml
+- id: windows-ocr
+  config:
+    passthrough: true
+    language: zh-Hans   # 仅 OCR 时生效；透传时无意义
+```
+
+用"在 dsh 里验证"的步骤确认：`passthrough: true` + 视觉模型时，发往服务商的请求应出现 `image_url` / data-URI 内容块；`passthrough: false` 时只有 `text`。
 
 ## 模型看到什么
 

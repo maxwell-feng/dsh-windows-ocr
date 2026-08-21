@@ -2,6 +2,31 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Docs
+
+- **Image routing guide (`passthrough`)**: documented how `passthrough` decides
+  whether an attached image is OCR'd locally or passed through to a vision model,
+  including the decision matrix and the fail-closed behaviour for text-only
+  models. Added to README.md and README.zh-CN.md.
+
+## [0.2.5] - 2026-08-21
+
+### Compatibility
+
+- **Adapted to deepseek-harness `0.1.1-rc.1`**: plugin code verified against
+  the rc.1 `llm` service (`resolveModelInfo` / `listModels` /
+  `adapter.stream` / `llm/adapters-updated`) and `attachments` service
+  (`readImage`) — unchanged from rc.8, as is the vendored cordis (`4.0.1`) —
+  no code changes required. Configuration and install docs now target
+  `0.1.1-rc.1`.
+- rc.1 verification: the streaming call path still funnels through
+  `registration.adapter.stream` (the single choke point this plugin wraps), so
+  attached image blocks are still rewritten to OCR text before any bytes reach
+  the wire; `resolveModelInfo` / `listModels` still expose `inputModalities`,
+  and `readImage` still returns `{ ref, data }`.
+
 ## [0.2.4] - 2026-08-20
 
 ### Compatibility

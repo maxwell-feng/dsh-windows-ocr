@@ -22,7 +22,7 @@ dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
 > **npm install registers the `windows-ocr` row by itself.** The package ships
 > a bundle patch (`dsh.bundle` + its own `cordis.patch.yml`) that inserts the
 > `windows-ocr` loader entry. Do **not** also add a manual `- insert:` row with
-> the same id to your profile — dsh `0.1.0-rc.8` (cordis-plugin-loader
+> the same id to your profile — dsh `0.1.1-rc.1` (cordis-plugin-loader
 > `1.0.2`) rejects duplicate loader entry ids and `dsh web` fails to boot with
 > `duplicate loader entry id: windows-ocr`.
 
@@ -64,7 +64,7 @@ you attach an image
 
 - Windows 10/11 (Windows PowerShell 5.1+ ships with the OS; no install needed)
 - A Windows OCR-capable language pack for your language (Settings → Time & language → Language). English is usually present; Chinese requires the Chinese language pack (OCR-capable).
-- `dsh` with a profile (tested against dsh `0.1.0-rc.8`)
+- `dsh` with a profile (tested against dsh `0.1.1-rc.1`)
 
 ## Install
 
@@ -103,7 +103,7 @@ Then restart `dsh web`. Remove the rows to uninstall — the plugin restores the
 
 > Choose **one** way to load the plugin: the npm bundle (above) **or** this
 > manual insert — never both. Both register the same `windows-ocr` entry id,
-> and dsh `0.1.0-rc.8` fails the boot with `duplicate loader entry id:
+> and dsh `0.1.1-rc.1` fails the boot with `duplicate loader entry id:
 > windows-ocr` when the row exists twice. If the row is already present (for
 > example after an npm bundle install), configure it with an id-targeted
 > override (see Configuration below) instead of inserting a second row.
@@ -148,6 +148,58 @@ row (not `insert:`) replaces the existing `windows-ocr` row's config:
   config:
     language: zh-Hans
 ```
+
+## Image routing: local OCR vs. vision passthrough
+
+The single switch that decides whether an attached image leaves the machine is
+`passthrough` in the `windows-ocr` config row.
+
+- `passthrough: false` (default, privacy-first): every image is recognized
+  locally with Windows OCR and only the recognized text is sent to the model.
+  Image bytes never leave the machine.
+- `passthrough: true`: a model that **natively** supports images receives the
+  original image bytes untouched, so a genuine vision model actually "sees" the
+  picture. Text-only models are still OCR'd locally (fail-closed) — see below.
+
+### Decision matrix
+
+| Model | `passthrough` | Image goes to |
+|---|---|---|
+| Multimodal / vision | `true` | the provider, original bytes (model sees the image) |
+| Multimodal / vision | `false` | local Windows OCR, text only |
+| Text-only | `true` | local Windows OCR (model has no vision; fail-closed) |
+| Text-only | `false` | local Windows OCR (default) |
+
+### Why `passthrough: true` does not always send the image
+
+This plugin shims `resolveModelInfo` / `listModels` so **every** model appears to
+support `image` — that is what lets dsh admit image attachments in the first
+place. But the actual routing uses the model's *native* capability
+(`nativeImageSupport`, queried through the un-shimmed `resolveModelInfo`) plus
+`passthrough`:
+
+- vision model + `passthrough: true` → original image out;
+- text model + `passthrough: true` → still OCR'd, because the model cannot
+  consume images. This is intentional fail-closed behaviour, not a bug.
+
+### How to change it
+
+The default `passthrough: false` ships with the package. To opt into vision
+passthrough, override the row in your profile's `cordis.patch.yml` with an
+**id-targeted** row (not `insert:`, which would register the id twice and fail
+the boot with `duplicate loader entry id: windows-ocr`):
+
+```yaml
+# ~/.dsh/profiles/web/cordis.patch.yml
+- id: windows-ocr
+  config:
+    passthrough: true
+    language: zh-Hans   # only used when OCR runs; irrelevant for passthrough
+```
+
+Verify with the steps under "Verification inside dsh": with `passthrough: true`
+and a vision model, the provider request should now contain an `image_url` /
+data-URI content part; with `passthrough: false` it contains only `text`.
 
 ## How the model sees the image
 
