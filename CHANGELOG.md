@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Docs
+
+- **Image routing guide (`passthrough`)**: documented how `passthrough` decides
+  whether an attached image is OCR'd locally or passed through to a vision model,
+  including the decision matrix and the fail-closed behaviour for text-only
+  models. Added to README.md and README.zh-CN.md.
+
 ## [0.2.5] - 2026-08-21
 
 ### Compatibility

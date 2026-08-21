@@ -114,6 +114,43 @@ dsh --profile web --patch C:/path/to/overlay.yml
     language: zh-Hans
 ```
 
+## 图片路由：本地 OCR 还是视觉透传
+
+决定"附件图片是否离开本机"的唯一开关，是 `windows-ocr` 配置行里的 `passthrough`。
+
+- `passthrough: false`（默认，隐私优先）：每张图都用 Windows OCR 在本地识别，只把识别出的文字发给模型。图片字节**不离开本机**。
+- `passthrough: true`：对**原生**支持图片的模型，原图字节原样直传，真正的多模态（视觉）模型就能"看到"这张图。纯文本模型仍会被本地 OCR（fail-closed，见下）。
+
+### 路由决策矩阵
+
+| 模型 | `passthrough` | 图片去向 |
+|---|---|---|
+| 多模态 / 视觉模型 | `true` | 服务商，原图直传（模型看图）|
+| 多模态 / 视觉模型 | `false` | 本地 Windows OCR，只发文字 |
+| 纯文本模型 | `true` | 本地 Windows OCR（模型无视觉能力，fail-closed）|
+| 纯文本模型 | `false` | 本地 Windows OCR（默认）|
+
+### 为什么 `passthrough: true` 不一定把图发出去
+
+本插件会 shim `resolveModelInfo` / `listModels`，让**所有**模型都"看起来"支持 `image`——这正是 dsh 能接收图片附件的前提。但真正的路由用的是模型的**原生**能力（`nativeImageSupport`，走未被 shim 包裹的原始 `resolveModelInfo`）再加上 `passthrough`：
+
+- 视觉模型 + `passthrough: true` → 原图出站；
+- 文本模型 + `passthrough: true` → 仍然 OCR，因为模型根本消费不了图片。这是有意的 fail-closed 行为，不是 bug。
+
+### 怎么改
+
+包里默认 `passthrough: false`。要开启视觉透传，用**以 id 定向**的行覆盖你 profile 的 `cordis.patch.yml`（不要用 `insert:`，否则会重复注册同一个 id，启动报 `duplicate loader entry id: windows-ocr` 失败）：
+
+```yaml
+# ~/.dsh/profiles/web/cordis.patch.yml
+- id: windows-ocr
+  config:
+    passthrough: true
+    language: zh-Hans   # 仅 OCR 时生效；透传时无意义
+```
+
+用"在 dsh 里验证"的步骤确认：`passthrough: true` + 视觉模型时，发往服务商的请求应出现 `image_url` / data-URI 内容块；`passthrough: false` 时只有 `text`。
+
 ## 模型看到什么
 
 每个图片块变成一个文本块（**不转发本地文件名**）：
