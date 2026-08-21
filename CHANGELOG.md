@@ -2,7 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
-## [Unreleased]
+## [0.2.6] - 2026-08-21
+
+### Compatibility
+
+- **Adapted to deepseek-harness `0.1.1-rc.2`**: plugin code verified against
+  the rc.2 `llm` service (`resolveModelInfo` / `listModels` /
+  `adapter.stream` / `llm/adapters-updated`) and `attachments` service
+  (`readImage`) — unchanged from rc.1, as is the vendored cordis (`4.0.1`) —
+  no code changes required. Configuration and install docs now target
+  `0.1.1-rc.2`.
+- rc.2 verification: the streaming call path still funnels through
+  `registration.adapter.stream` (the single choke point this plugin wraps), so
+  attached image blocks are still rewritten to OCR text before any bytes reach
+  the wire; `resolveModelInfo` / `listModels` still expose `inputModalities`,
+  and `readImage` still returns `{ ref, data }`.
 
 ### Docs
 

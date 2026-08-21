@@ -22,7 +22,7 @@ dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
 > **npm install registers the `windows-ocr` row by itself.** The package ships
 > a bundle patch (`dsh.bundle` + its own `cordis.patch.yml`) that inserts the
 > `windows-ocr` loader entry. Do **not** also add a manual `- insert:` row with
-> the same id to your profile — dsh `0.1.1-rc.1` (cordis-plugin-loader
+> the same id to your profile — dsh `0.1.1-rc.2` (cordis-plugin-loader
 > `1.0.2`) rejects duplicate loader entry ids and `dsh web` fails to boot with
 > `duplicate loader entry id: windows-ocr`.
 
@@ -64,7 +64,7 @@ you attach an image
 
 - Windows 10/11 (Windows PowerShell 5.1+ ships with the OS; no install needed)
 - A Windows OCR-capable language pack for your language (Settings → Time & language → Language). English is usually present; Chinese requires the Chinese language pack (OCR-capable).
-- `dsh` with a profile (tested against dsh `0.1.1-rc.1`)
+- `dsh` with a profile (tested against dsh `0.1.1-rc.2`)
 
 ## Install
 
@@ -103,7 +103,7 @@ Then restart `dsh web`. Remove the rows to uninstall — the plugin restores the
 
 > Choose **one** way to load the plugin: the npm bundle (above) **or** this
 > manual insert — never both. Both register the same `windows-ocr` entry id,
-> and dsh `0.1.1-rc.1` fails the boot with `duplicate loader entry id:
+> and dsh `0.1.1-rc.2` fails the boot with `duplicate loader entry id:
 > windows-ocr` when the row exists twice. If the row is already present (for
 > example after an npm bundle install), configure it with an id-targeted
 > override (see Configuration below) instead of inserting a second row.
