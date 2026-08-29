@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.0] - 2026-08-29
+
+### Compatibility
+
+- **Adapted to deepseek-harness `0.1.2-alpha.1` (master)**: the image→OCR
+  rewrite moved from the `adapter.stream` monkey-patch to the official
+  `agent/pre-step` waterfall ("Reject a proposed step or replace the messages
+  that enter it"). The bundled adapters now override `prepareCall()` and
+  dispatch through generation-bound closures that bypass `adapter.stream`, so
+  the old seam no longer intercepted anything; `agent/pre-step` covers every
+  dispatch path because both `ctx.llm.stream` and `prepareCall().stream`
+  build from the step's messages. `@deepseek-ai/cordis` stays `4.0.1`.
+- The `resolveModelInfo` / `listModels` capability shim and the
+  `attachments.readImage` usage are unchanged and remain compatible.
+- Registration is now a single fiber-scoped `agent/pre-step` listener
+  (`prepend`), replacing the `llm/adapters-updated` re-wrap machinery; the
+  standalone test drives the rewrite through the pre-step seam.
+
 All notable changes to this project are documented in this file.
 
 ## [0.2.4] - 2026-08-20

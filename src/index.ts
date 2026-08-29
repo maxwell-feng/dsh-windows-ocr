@@ -8,27 +8,30 @@
 // Two seams are used, both on the public `llm` service:
 //
 //  1. resolveModelInfo / listModels shim — the host gates image attachments on
-//     `inputModalities.includes("image")` (api-proxy admission, model switch,
+//     `inputModalities.includes("image")` (session admission, model switch,
 //     and the read_image tool all query this one method). We answer "yes" so
 //     text models admit images; the config stays untouched and fail-closed:
 //     if this plugin is not loaded, models stay text-only and images are
 //     refused, never uploaded.
 //
-//  2. adapter.stream wrap — both streaming call paths (ctx.llm.stream and
-//     prepareCall().stream) funnel into registration.adapter.stream, the last
-//     stop before the wire. We replace image blocks with OCR text here, so the
-//     adapter's own image check (`containsImage`) is false, no attachment
-//     bytes are serialized, and no image_url is ever built.
+//  2. agent/pre-step rewrite — the agent loop emits the `agent/pre-step`
+//     waterfall once per step with the messages that will enter the model
+//     call ("Reject a proposed step or replace the messages that enter it").
+//     Both streaming call paths (ctx.llm.stream and prepareCall().stream)
+//     build their request from those messages, so replacing image blocks with
+//     OCR text here covers every adapter. Monkey-patching `adapter.stream` is
+//     no longer sufficient: the bundled adapters override `prepareCall()` and
+//     dispatch through generation-bound closures that bypass `adapter.stream`.
 //
 // By default every image is OCR'd (`passthrough: false`). Set
 // `passthrough: true` only when you intentionally want genuine vision models
-// to receive original image bytes.
+// to receive original image bytes; text-only models are still OCR'd.
 //
 // Temp-file hygiene: every OCR run writes its image and output into a fresh
 // temporary directory (windows-ocr-*) that is removed in `finally` — on
 // success, on error, and on timeout (after waiting for the child to exit). At
 // plugin start we also sweep orphaned windows-ocr-* directories left behind by
-// a crashed process. Hot-unload restores the original llm/adapter methods.
+// a crashed process. Hot-unload restores the original llm methods.
 
 import type { Context } from "@deepseek-ai/cordis";
 import { spawn, type ChildProcess } from "node:child_process";
@@ -44,11 +47,14 @@ export const name = "windows-ocr";
 // are ready before apply runs").
 export const inject = ["llm", "attachments"];
 
-// The host emits this event when adapters are (re)registered; the cordis
+// The host emits this event when the agent loop proposes a step; the cordis
 // Events map does not know it, so declare it here.
 declare module "@deepseek-ai/cordis" {
   interface Events {
-    "llm/adapters-updated"(): void;
+    "agent/pre-step"(
+      payload: AgentPreStepPayload,
+      next: () => Promise<PreStepDecision>,
+    ): Promise<PreStepDecision>;
   }
 }
 
@@ -58,10 +64,6 @@ declare module "@deepseek-ai/cordis" {
 
 type ModalityInfo = { inputModalities?: string[] };
 
-interface LlmAdapter {
-  stream(options: GenerateOptions): AsyncIterable<unknown>;
-}
-
 interface LlmService {
   resolveModelInfo(
     provider: string,
@@ -69,13 +71,6 @@ interface LlmService {
     signal?: AbortSignal,
   ): Promise<ModalityInfo | undefined>;
   listModels(provider: string): Promise<Array<{ id: string } & ModalityInfo>>;
-  adapters: Map<string, { adapter: LlmAdapter }>;
-}
-
-interface GenerateOptions {
-  provider?: string;
-  model?: string;
-  messages?: MessageLike[];
 }
 
 interface ImageAttachmentRef {
@@ -107,6 +102,31 @@ interface AttachmentStore {
     signal?: AbortSignal,
   ): Promise<{ ref: ImageAttachmentRef; data: Uint8Array }>;
 }
+
+/** Route facts the agent/pre-step payload exposes without importing @deepseek-ai/dsh-agent types. */
+interface AgentRoute {
+  provider?: string;
+  model?: string;
+}
+
+interface AgentLike {
+  options?: AgentRoute;
+  session?: {
+    requestHeader?: () => { config?: AgentRoute } | undefined;
+  };
+}
+
+interface AgentPreStepPayload {
+  agent: AgentLike;
+  messages: MessageLike[];
+  turn: number;
+  step: number;
+  signal: AbortSignal;
+}
+
+type PreStepDecision =
+  | { kind: "reject" }
+  | { kind: "enter"; messages: MessageLike[]; startsRequestSeries?: true };
 
 interface Config {
   language?: string;
@@ -428,14 +448,39 @@ export function apply(ctx: Context, config: Config = {}): void {
     return out ?? content;
   }
 
+  /** The route that served the last request, falling back to the loop's configured route. */
+  function currentRoute(agent: AgentLike): AgentRoute {
+    const config = agent.session?.requestHeader?.()?.config;
+    if (
+      config &&
+      typeof config.provider === "string" && config.provider &&
+      typeof config.model === "string" && config.model
+    ) {
+      return { provider: config.provider, model: config.model };
+    }
+    const options = agent.options;
+    return {
+      provider:
+        typeof options?.provider === "string" && options.provider
+          ? options.provider
+          : undefined,
+      model:
+        typeof options?.model === "string" && options.model
+          ? options.model
+          : undefined,
+    };
+  }
+
   async function rewriteMessages(
     messages: MessageLike[] | undefined,
-    provider: string | undefined,
-    model: string | undefined,
+    agent: AgentLike,
   ): Promise<MessageLike[] | undefined> {
     if (!Array.isArray(messages)) return messages;
-    if (passthrough && provider && model && (await nativeImageSupport(provider, model))) {
-      return messages; // genuine vision model: images go through untouched
+    if (passthrough) {
+      const route = currentRoute(agent);
+      if (route.provider && route.model && (await nativeImageSupport(route.provider, route.model))) {
+        return messages; // genuine vision model: images go through untouched
+      }
     }
     let out: MessageLike[] | null = null;
     for (let i = 0; i < messages.length; i++) {
@@ -448,48 +493,27 @@ export function apply(ctx: Context, config: Config = {}): void {
     return out ?? messages;
   }
 
-  // --- 4. Adapter stream wrap ------------------------------------------------
-  // The single choke point both streaming paths funnel through
-  // (stream() and prepareCall().stream() -> streamWithRegistration ->
-  // adapterStream -> adapter.stream).
-  const wrappedAdapters = new Map<
-    LlmAdapter,
-    { wrap: LlmAdapter["stream"]; orig: LlmAdapter["stream"] }
-  >();
-
-  function wrapAdapter(adapter: LlmAdapter | undefined): void {
-    if (!adapter || typeof adapter.stream !== "function" || wrappedAdapters.has(adapter)) {
-      return;
-    }
-    const unboundOrig = adapter.stream;
-    const origStream = unboundOrig.bind(adapter);
-    const streamWrap: LlmAdapter["stream"] = async function* (options: GenerateOptions) {
-      const messages = await rewriteMessages(
-        options?.messages,
-        options?.provider,
-        options?.model,
-      );
-      yield* origStream(
-        messages === options?.messages ? options : { ...options, messages },
-      ) as AsyncIterable<unknown>;
-    };
-    adapter.stream = streamWrap;
-    wrappedAdapters.set(adapter, { wrap: streamWrap, orig: unboundOrig });
-  }
-
-  for (const registration of llm.adapters.values()) {
-    wrapAdapter(registration.adapter);
-  }
-
-  // Late registration / HMR replacement: wrap any adapter that appears later.
-  const disposeListener = ctx.on("llm/adapters-updated", () => {
-    for (const registration of llm.adapters.values()) {
-      wrapAdapter(registration.adapter);
-    }
-  });
+  // --- 4. Pre-step rewrite ----------------------------------------------------
+  // The agent loop emits `agent/pre-step` once per step, before the model
+  // request is built, with the messages that will enter it. Replacing image
+  // blocks with OCR text here covers every dispatch path (ctx.llm.stream and
+  // prepareCall().stream both build from these messages), independent of how
+  // an adapter dispatches. `prepend` wraps the outermost layer, so the
+  // rewrite applies after other listeners have settled the messages.
+  ctx.on(
+    "agent/pre-step",
+    async (payload, next) => {
+      const decision = await next();
+      if (decision.kind === "reject") return decision;
+      const messages = await rewriteMessages(decision.messages, payload.agent);
+      return messages === undefined || messages === decision.messages
+        ? decision
+        : { ...decision, messages };
+    },
+    { prepend: true },
+  );
 
   ctx.effect(() => () => {
-    disposeListener();
     ocrCache.clear();
     // Restore capability shims only if nothing else replaced them after us.
     if (llm.resolveModelInfo === resolveModelInfoShim) {
@@ -498,11 +522,5 @@ export function apply(ctx: Context, config: Config = {}): void {
     if (llm.listModels === listModelsShim) {
       llm.listModels = origListModels;
     }
-    for (const [adapter, { wrap, orig }] of wrappedAdapters) {
-      // Only unwrap when our wrap is still installed; leave third-party /
-      // HMR replacements alone.
-      if (adapter.stream === wrap) adapter.stream = orig;
-    }
-    wrappedAdapters.clear();
   });
 }

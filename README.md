@@ -22,7 +22,7 @@ dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
 > **npm install registers the `windows-ocr` row by itself.** The package ships
 > a bundle patch (`dsh.bundle` + its own `cordis.patch.yml`) that inserts the
 > `windows-ocr` loader entry. Do **not** also add a manual `- insert:` row with
-> the same id to your profile — dsh `0.1.0-rc.8` (cordis-plugin-loader
+> the same id to your profile — dsh `0.1.2-alpha.1` (cordis-plugin-loader
 > `1.0.2`) rejects duplicate loader entry ids and `dsh web` fails to boot with
 > `duplicate loader entry id: windows-ocr`.
 
@@ -48,23 +48,23 @@ instructions are below.
 dsh skills are Markdown instruction files injected into the model context — they cannot execute code, cannot hook the request pipeline, and cannot stop an image from being serialized. This feature needs exactly that, so it is a cordis plugin that hooks two public seams of the `llm` service:
 
 1. **Capability shim** — `ctx.llm.resolveModelInfo` (also `listModels`). The host gates image attachments on `inputModalities.includes("image")` at three places: message admission, model switching, and the `read_image` tool. The shim answers "yes", so text models admit images.
-2. **Request rewrite** — `registration.adapter.stream` (the single choke point both `ctx.llm.stream` and `prepareCall().stream` funnel through). Every `image` content block is replaced with an OCR text block before the adapter serializes the request, so the adapter's own image check never fires, no attachment bytes are read for the wire, and no `image_url` is ever built.
+2. **Pre-step rewrite** — `agent/pre-step`, the harness's official seam for replacing the messages that enter a model call ("Reject a proposed step or replace the messages that enter it"). Every `image` content block is replaced with an OCR text block before the request is built, so no attachment bytes are ever serialized and no `image_url` is ever built. It covers every dispatch path — `ctx.llm.stream` and `prepareCall().stream` both build from the step's messages; wrapping `adapter.stream` no longer works because the bundled adapters override `prepareCall()` and dispatch through generation-bound closures.
 
 ```
 you attach an image
   → admission asks ctx.llm.resolveModelInfo (shimmed: "image" ✓)
   → image stored in the local attachment store (session log, UI preview)
-  → agent builds the request → adapter.stream (wrapped)
+  → agent loop proposes a step → agent/pre-step (rewritten)
   → image block read locally (ctx.attachments.readImage) → Windows OCR
   → block replaced with <image_ocr>…text…</image_ocr>
-  → adapter serializes a text-only request → provider
+  → request built from OCR'd messages → adapter serializes text only → provider
 ```
 
 ## Requirements
 
 - Windows 10/11 (Windows PowerShell 5.1+ ships with the OS; no install needed)
 - A Windows OCR-capable language pack for your language (Settings → Time & language → Language). English is usually present; Chinese requires the Chinese language pack (OCR-capable).
-- `dsh` with a profile (tested against dsh `0.1.0-rc.8`)
+- `dsh` with a profile (tested against dsh `0.1.2-alpha.1` (master))
 
 ## Install
 
@@ -103,7 +103,7 @@ Then restart `dsh web`. Remove the rows to uninstall — the plugin restores the
 
 > Choose **one** way to load the plugin: the npm bundle (above) **or** this
 > manual insert — never both. Both register the same `windows-ocr` entry id,
-> and dsh `0.1.0-rc.8` fails the boot with `duplicate loader entry id:
+> and dsh `0.1.2-alpha.1` fails the boot with `duplicate loader entry id:
 > windows-ocr` when the row exists twice. If the row is already present (for
 > example after an npm bundle install), configure it with an id-targeted
 > override (see Configuration below) instead of inserting a second row.
@@ -191,7 +191,7 @@ Exit code 0 with an empty/whitespace `out.txt` means the OCR engine works (a 1×
 - OCR language availability depends on installed Windows language packs (script exits 2/3 and the plugin degrades to a placeholder text).
 - GIFs: Windows OCR recognizes the first frame.
 - Cache is per process; a long-lived session keeps OCR text cached, bounded by `maxCacheEntries`.
-- Hot reload (HMR) replaces adapters; the plugin re-wraps new adapters on `llm/adapters-updated`, but a full restart is the safe path after any dsh update.
+- The plugin registers one fiber-scoped `agent/pre-step` listener and restores the `llm` capability shims on unload. A full restart is still the safest path after any dsh update.
 - The model picker may show text models without an "image" badge (cosmetic only — `listModels` is shimmed consistently).
 - If the OCR plugin is removed, image attachments to text models are refused again (fail-closed), not uploaded.
 

@@ -19,7 +19,7 @@ dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
 
 （把 `web` 换成你的 profile，如 `tui`。）预编译发布（含 Sigstore provenance），无需源码构建或 `allowBuilds` 授权。从本仓库源码安装仍可用下方 agent 指南或手动步骤。
 
-> **npm 安装会自行注册 `windows-ocr` 这一行。** 该包自带 bundle 补丁（`dsh.bundle` + 它自己的 `cordis.patch.yml`），已经插入了 `windows-ocr` 这个 loader 条目。请**不要**再往 profile 里手动 `- insert:` 一行同 id 的条目——dsh `0.1.0-rc.8`（cordis-plugin-loader `1.0.2`）会拒绝重复的 loader 条目 id，`dsh web` 会以 `duplicate loader entry id: windows-ocr` 启动失败。
+> **npm 安装会自行注册 `windows-ocr` 这一行。** 该包自带 bundle 补丁（`dsh.bundle` + 它自己的 `cordis.patch.yml`），已经插入了 `windows-ocr` 这个 loader 条目。请**不要**再往 profile 里手动 `- insert:` 一行同 id 的条目——dsh `0.1.2-alpha.1`会拒绝重复的 loader 条目 id，`dsh web` 会以 `duplicate loader entry id: windows-ocr` 启动失败。
 
 ## 让 AI agent 快速安装
 
@@ -34,23 +34,23 @@ dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
 dsh 的 skill 只是注入模型上下文的 Markdown 指令：不能执行代码、不能钩住请求管线、更拦不住图片被序列化上传。这个功能恰好需要这些，所以它是一个 cordis 插件，钩住 `llm` 服务的两个公开接缝：
 
 1. **能力声明（shim）**——包装 `ctx.llm.resolveModelInfo`（以及 `listModels`）。宿主在三处用 `inputModalities.includes("image")` 拦截图片：发送准入、切换模型、`read_image` 工具。shim 让回答变成"支持"，文本模型即可收图。
-2. **请求改写**——包装 `registration.adapter.stream`（`ctx.llm.stream` 和 `prepareCall().stream` 两条路径的唯一汇聚点）。适配器序列化请求前，所有 `image` 内容块已被替换成 OCR 文本块，适配器的图片检查永远不会触发，附件字节不会为出站请求被读取，也永远不会生成 `image_url`。
+2. **步前改写**——`agent/pre-step`，官方提供的、用于替换进入模型调用的消息的接缝（"拒绝一个即将开始的 step，或替换进入它的消息"）。请求构建前，所有 `image` 内容块已被替换成 OCR 文本块，附件字节永远不会被序列化，也永远不会生成 `image_url`。它覆盖所有派发路径——`ctx.llm.stream` 和 `prepareCall().stream` 都从该 step 的消息构建请求；包装 `adapter.stream` 已不再有效，因为内置适配器重写了 `prepareCall()`，通过绑定代的闭包派发。
 
 ```
 你附加图片
   → 准入层问 ctx.llm.resolveModelInfo（shim 返回含 "image" ✓）
   → 图片存入本地附件库（会话日志、UI 预览）
-  → agent 组装请求 → adapter.stream（被包装）
+  → agent 循环提出 step → agent/pre-step（改写）
   → 本地读取图片字节（ctx.attachments.readImage）→ Windows OCR
   → 图片块替换为 <image_ocr>…识别文字…</image_ocr>
-  → 适配器序列化纯文本请求 → 发给服务商
+  → 用 OCR 后的消息构建请求 → 适配器只序列化文本 → 发给服务商
 ```
 
 ## 环境要求
 
 - Windows 10/11（自带 Windows PowerShell 5.1，无需安装任何东西）
 - 你所用语言对应的 OCR 语言包（设置 → 时间和语言 → 语言）。英文一般自带；中文需要安装中文语言包（含 OCR 能力）。
-- 已安装 `dsh` 及 profile（在 dsh `0.1.0-rc.8` 上验证）
+- 已安装 `dsh` 及 profile（在 dsh `0.1.2-alpha.1` 上验证）
 
 ## 安装
 
@@ -77,7 +77,7 @@ dsh 的 skill 只是注入模型上下文的 Markdown 指令：不能执行代�
 
 然后重启 `dsh web`。删掉这几行即卸载——插件在卸载时会恢复被替换的 `llm`/adapter 原方法。
 
-> **两种加载方式二选一**：npm bundle（上文）**或**这里的手动 insert——绝不能同时用。两者注册的是同一个 `windows-ocr` 条目 id，而 dsh `0.1.0-rc.8` 在行重复出现时会以 `duplicate loader entry id: windows-ocr` 拒绝启动。如果这一行已经存在（例如已按 npm bundle 方式安装），请用下方的按 id 覆盖方式改配置，而不是再插入一行。
+> **两种加载方式二选一**：npm bundle（上文）**或**这里的手动 insert——绝不能同时用。两者注册的是同一个 `windows-ocr` 条目 id，而 dsh `0.1.2-alpha.1` 在行重复出现时会以 `duplicate loader entry id: windows-ocr` 拒绝启动。如果这一行已经存在（例如已按 npm bundle 方式安装），请用下方的按 id 覆盖方式改配置，而不是再插入一行。
 
 ### 临时加载：`--patch` overlay
 
@@ -150,7 +150,7 @@ Get-Content out.txt
 - OCR 语言取决于系统安装的语言包（脚本退出码 2/3 时，插件降级为占位文本）。
 - GIF：Windows OCR 只识别第一帧。
 - 缓存按进程存活；长会话的 OCR 文本会缓存，受 `maxCacheEntries` 限制。
-- 热重载（HMR）会替换适配器；插件会在 `llm/adapters-updated` 时重新包装新适配器，但 dsh 升级后建议完整重启。
+- 插件注册一个 fiber 作用域的 `agent/pre-step` 监听器，卸载时恢复 `llm` 能力 shim。dsh 升级后仍建议完整重启。
 - 模型选择 UI 上文本模型可能不带"图片"徽标（纯外观，`listModels` 已一致地 shim）。
 - 移除插件后，文本模型的图片附件会重新被拒绝（fail-closed），不会被上传。
 
