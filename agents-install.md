@@ -71,7 +71,7 @@ the `c:` URL scheme and the loader rejects it with
    ```
 
    A `windows-ocr` row already exists whenever the plugin was installed from
-   npm (`dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr`) — the
+   npm (`dsh plugin --profile web add dsh-windows-ocr`) — the
    package's own bundle patch inserts it. Pick **one** install method (npm
    bundle **or** the manual insert above); combining both registers the same
    entry id twice and dsh refuses to boot.

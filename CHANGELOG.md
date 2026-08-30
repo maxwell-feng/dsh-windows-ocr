@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1] - 2026-08-30
+
+### Changed
+
+- **npm package renamed back to unscoped `dsh-windows-ocr`** (dropped the
+  `@maxwell-feng/` scope, aligned with the `dsh-tinyfish-search` convention).
+  Install commands, badges and docs use the new name; the scoped package is
+  deprecated on npm. No code, config or behavior changes otherwise.
+
 ## [0.3.0] - 2026-08-29
 
 ### Compatibility

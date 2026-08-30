@@ -14,7 +14,7 @@
 ## Install from npm
 
 ```bash
-dsh plugin --profile web add @maxwell-feng/dsh-windows-ocr
+dsh plugin --profile web add dsh-windows-ocr
 ```
 
 (Replace `web` with your profile, e.g. `tui`.) Prebuilt and published with Sigstore provenance — no source build or `allowBuilds` approval needed. Installing from source (this repo) still works via the agent guide or the manual steps below.
