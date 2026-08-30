@@ -19,6 +19,18 @@ dsh plugin --profile web add dsh-windows-ocr
 
 （把 `web` 换成你的 profile，如 `tui`。）预编译发布（含 Sigstore provenance），无需源码构建或 `allowBuilds` 授权。从本仓库源码安装仍可用下方 agent 指南或手动步骤。
 
+或者从仓库 / tarball 安装：
+
+```bash
+dsh plugin --profile web add ./dsh-windows-ocr        # 源码目录
+dsh plugin --profile web add ./dsh-windows-ocr-0.3.2.tgz
+dsh plugin --profile web add github:maxwell-feng/dsh-windows-ocr
+```
+
+> Git 安装拿到的是源码而非构建产物：包的 `prepare` 脚本会运行 `tsc` 从源码
+> 重建 `lib/`，并且 pnpm ≥ 10 需要一次性允许构建（它会打印确切的
+> `pnpm-workspace.yaml` 片段）。
+
 > **npm 安装会自行注册 `windows-ocr` 这一行。** 该包自带 bundle 补丁（`dsh.bundle` + 它自己的 `cordis.patch.yml`），已经插入了 `windows-ocr` 这个 loader 条目。请**不要**再往 profile 里手动 `- insert:` 一行同 id 的条目——dsh `0.1.2-alpha.1`会拒绝重复的 loader 条目 id，`dsh web` 会以 `duplicate loader entry id: windows-ocr` 启动失败。
 
 ## 让 AI agent 快速安装
