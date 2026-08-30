@@ -2,7 +2,7 @@
 # "last write wins per row" — no other bundle targets the `windows-ocr` id.
 - insert:
     - id: windows-ocr
-      name: '@maxwell-feng/dsh-windows-ocr'
+      name: 'dsh-windows-ocr'
       config:
         # BCP-47 language tag for Windows OCR, e.g. "zh-Hans", "en-US".
         # Empty (default): use the user profile languages.
