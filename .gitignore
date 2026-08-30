@@ -3,3 +3,5 @@ node_modules/
 .DS_Store
 .mimosa/
 dev.patch.yml
+# npm cache written with a literal %APPDATA% path when the env var is unset
+%APPDATA%/
