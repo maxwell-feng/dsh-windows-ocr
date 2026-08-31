@@ -34,6 +34,7 @@
 // a crashed process. Hot-unload restores the original llm methods.
 
 import type { Context } from "@deepseek-ai/cordis";
+import Schema from "@deepseek-ai/schemastery";
 import { spawn, type ChildProcess } from "node:child_process";
 import { lstatSync, readdirSync, promises as fs, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -128,7 +129,7 @@ type PreStepDecision =
   | { kind: "reject" }
   | { kind: "enter"; messages: MessageLike[]; startsRequestSeries?: true };
 
-interface Config {
+export interface Config {
   language?: string;
   passthrough?: boolean;
   ocrScript?: string;
@@ -145,6 +146,19 @@ const EXT_BY_MEDIA: Record<string, string> = {
 
 const TEMP_PREFIX = "windows-ocr-";
 const DEFAULT_OCR_SCRIPT = fileURLToPath(new URL("./ocr.ps1", import.meta.url));
+
+/**
+ * Loader-time configuration schema (docs/user/develop/basic/config). The
+ * loader validates and fills defaults before apply() runs; apply() keeps its
+ * defensive fallbacks so direct callers (tests) see identical behavior.
+ */
+export const Config: Schema<Config> = Schema.object({
+  language: Schema.string().default(""),
+  passthrough: Schema.boolean().default(false),
+  ocrScript: Schema.string().default(DEFAULT_OCR_SCRIPT),
+  timeoutMs: Schema.number().default(60000),
+  maxCacheEntries: Schema.number().default(200),
+});
 const MISSING_ATTACHMENT_TEXT =
   "(OCR: missing attachment — image refused)";
 

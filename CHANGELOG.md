@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.3.3] - 2026-08-31
+
+### Compatibility / 兼容性
+
+- **Adapted to deepseek-harness `0.1.2-alpha.2` (master)**: the `agent/pre-step`
+  waterfall payload and `PreStepDecision`, the `resolveModelInfo` /
+  `listModels` capability shim, and `attachments.readImage` are unchanged
+  from `0.1.2-alpha.1`, so no plugin code changes were required.
+  `@deepseek-ai/cordis` moves to `4.0.2`.
+- **适配 deepseek-harness `0.1.2-alpha.2`（master）**：`agent/pre-step`
+  瀑布事件的载荷与 `PreStepDecision`、`resolveModelInfo` / `listModels`
+  能力 shim 以及 `attachments.readImage` 均与 `0.1.2-alpha.1` 一致，因此
+  无需改动插件代码。`@deepseek-ai/cordis` 升至 `4.0.2`。
+
+### Added / 新增
+
+- The plugin now exports the documented `Config` Schemastery schema
+  (docs/user/develop/basic/config), so the loader validates configuration and
+  fills defaults (including the bundled `ocr.ps1` path) before `apply()` runs;
+  invalid config fails the boot loudly instead of being silently ignored.
+  `@deepseek-ai/schemastery` `3.18.2` is pinned and a `@deepseek-ai/cordis`
+  peer range (`>=4.0.0 <5.0.0`) declares the supported framework floor.
+- 插件现在按文档导出 `Config` Schemastery schema
+  （docs/user/develop/basic/config）：加载器在 `apply()` 之前校验配置并填充
+  默认值（含随包 `ocr.ps1` 的路径），非法配置会大声地启动失败，而不再被
+  静默忽略。锁定 `@deepseek-ai/schemastery` `3.18.2`，并新增
+  `@deepseek-ai/cordis` 的 peer 区间（`>=4.0.0 <5.0.0`）以声明所支持的
+  框架下限。
+
 ## [0.3.2] - 2026-08-30
 
 ### Changed
