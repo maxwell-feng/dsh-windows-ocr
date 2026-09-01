@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.3.4] - 2026-09-01
+
+### Compatibility / 兼容性
+
+- **Adapted to deepseek-harness `0.1.2-alpha.3` (master)**: between `0.1.2-alpha.2`
+  and `0.1.2-alpha.3` the `agent/pre-step` waterfall payload and `PreStepDecision`,
+  the `resolveModelInfo` / `listModels` capability shim, and `attachments.readImage`
+  are unchanged — the alpha.3 diff in `packages/core/agent-loop` is tests/docs
+  only, and `packages/attachment` merely adds an `admitPromptContent` helper — so
+  no plugin code changes were required. `@deepseek-ai/cordis` stays at `4.0.2` and
+  `@deepseek-ai/schemastery` stays at `3.18.2` (the pins the alpha.3 checkout
+  builds against). `lib/` is rebuilt; the standalone OCR smoke test still passes.
+- **适配 deepseek-harness `0.1.2-alpha.3`（master）**：从 `0.1.2-alpha.2`
+  到 `0.1.2-alpha.3`，`agent/pre-step` 瀑布事件的载荷与 `PreStepDecision`、
+  `resolveModelInfo` / `listModels` 能力 shim 以及 `attachments.readImage`
+  均无变化——alpha.3 在 `packages/core/agent-loop` 的差异仅为测试/文档，
+  `packages/attachment` 只新增了 `admitPromptContent` 帮助函数——因此无需改动
+  插件代码。`@deepseek-ai/cordis` 保持 `4.0.2`，`@deepseek-ai/schemastery`
+  保持 `3.18.2`（与 alpha.3 检出构建所用的锁定版本一致）。已重建 `lib/`；
+  OCR 独立冒烟测试仍然通过。
+
 ## [0.3.3] - 2026-08-31
 
 ### Compatibility / 兼容性
