@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.5] - 2026-09-02
+
+### Compatibility / 兼容性
+
+- **Verified against deepseek-harness `0.1.2-alpha.4` (latest `master`).** No seam changes since `0.1.2-alpha.3` (`ctx.llm.resolveModelInfo` shim + `agent/pre-step` rewrite remain the stable integration points). Bumped tarball reference to `0.3.5` and completed bilingual six-section coverage (Release / Changelog / Install / Uninstall / Usage / Config). No code migration required. / **已在 deepseek-harness `0.1.2-alpha.4` 最新 `master` 上验证。** 自 `0.1.2-alpha.3` 以来无缝接口变更（`ctx.llm.resolveModelInfo` 能力补丁 + `agent/pre-step` 改写仍为稳定集成点）。安装包引用升级至 `0.3.5`，并补齐双语六项覆盖（发行版 / 更新说明 / 安装 / 卸载 / 使用 / 配置）。无需代码迁移。
+
 ## [0.3.3] - 2026-08-31
 
 ### Compatibility / 兼容性

@@ -126,6 +126,10 @@ dsh --profile web --patch C:/path/to/overlay.yml
     language: zh-Hans
 ```
 
+## 使用说明
+
+附加任意图片到文本模型会话并发送——插件在 `agent/pre-step` 拦截，本地经 `Windows.Media.Ocr` 识别，并在请求构建前将 `image` 块替换为文本块。无需改动任何代码或模型配置；dsh 中所有 provider/模型均受益。
+
 ## 模型看到什么
 
 每个图片块变成一个文本块（**不转发本地文件名**）：
@@ -156,6 +160,14 @@ Get-Content out.txt
 
 1. 在文本模型会话里附加一张图片并发送——模型应能引用识别出的文字作答。
 2. 确认图片没出站：web UI 打开 DevTools → Network，查看发往服务商 baseURL 的请求，确认 payload 里只有 `text` 内容块（没有 `image_url`/data URI）。
+
+## 卸载说明
+
+```bash
+dsh plugin --profile web remove dsh-windows-ocr
+```
+
+手动安装时，从 profile 的 `cordis.patch.yml` 删除 `windows-ocr` 行并重启 `dsh --profile web`。插件卸载时恢复原始 `llm` shim；卸载后文本模型的图片附件将重新被拒绝（fail-closed）。
 
 ## 已知限制
 

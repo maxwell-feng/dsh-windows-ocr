@@ -161,6 +161,10 @@ row (not `insert:`) replaces the existing `windows-ocr` row's config:
     language: zh-Hans
 ```
 
+## Usage
+
+Attach any image to a text-model session and send a message — the plugin intercepts `agent/pre-step`, OCRs the image locally via `Windows.Media.Ocr`, and replaces the `image` block with a text block before the request is built. No code or model-config changes needed; every provider/model in dsh benefits.
+
 ## How the model sees the image
 
 Each image block becomes a text block (local filenames are **not** forwarded):
@@ -197,6 +201,14 @@ Exit code 0 with an empty/whitespace `out.txt` means the OCR engine works (a 1×
 
 1. Attach an image to a text-model session and send a message — the model should answer using the recognized text.
 2. Confirm the image never goes out: open DevTools → Network in the web UI, inspect the request to your provider base URL, and verify the payload contains only `text` content parts (no `image_url` / data URI).
+
+## Uninstall
+
+```bash
+dsh plugin --profile web remove dsh-windows-ocr
+```
+
+For manual installs, delete the `windows-ocr` row from your profile's `cordis.patch.yml` and restart `dsh --profile web`. The plugin restores the original `llm` shims on unload; a full restart is safest after removal. After uninstall, text-model image attachments are refused again (fail-closed).
 
 ## Limitations
 
