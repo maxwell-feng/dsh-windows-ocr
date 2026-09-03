@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.7] - 2026-09-03
+
+### Compatibility / 兼容性
+
+- **Verified against deepseek-harness `0.1.2-rc.1` (latest `master`).** No seam changes since `0.1.2-alpha.5` (`ctx.llm.resolveModelInfo` shim + `agent/pre-step` rewrite remain the stable integration points); the vendored `@deepseek-ai/cordis` `4.0.2` and the loader/bundle patch mechanism are unchanged, so no code migration is required. README requirements and bundle notes now reference `0.1.2-rc.1`; tests ALL PASS. / **已在 deepseek-harness `0.1.2-rc.1` 最新 `master` 上验证。** 自 `0.1.2-alpha.5` 以来无缝接口变更（`ctx.llm.resolveModelInfo` 能力补丁 + `agent/pre-step` 改写仍为稳定集成点）；内置 `@deepseek-ai/cordis` `4.0.2` 与 loader / bundle 补丁机制均未变化，无需代码迁移。README 环境要求与 bundle 说明现已引用 `0.1.2-rc.1`；测试全部通过。
+
 ## [0.3.6] - 2026-09-02
 
 ### Compatibility / 兼容性
