@@ -1,6 +1,6 @@
 {
   "name": "dsh-windows-ocr",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "dsh plugin: recognize attached images with the built-in Windows OCR engine (Windows.Media.Ocr) and send only the recognized text to the model. Text models never receive image bytes; vision passthrough is opt-in.",
   "type": "module",
   "main": "lib/index.js",
