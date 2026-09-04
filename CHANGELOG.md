@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.8] - 2026-09-04
+
+### Compatibility / 兼容性
+
+- **Verified against deepseek-harness `0.1.3-alpha.1` (latest release).** No seam changes since `0.1.2-rc.1`: the `ctx.llm.resolveModelInfo` shim and the `agent/pre-step` message rewrite remain the stable integration points, and `ctx.attachments.readImage` is source-identical between the two tags (0.1.3's new file-attachment types are additive and untouched by this plugin). The vendored `@deepseek-ai/cordis` `4.0.2` and the loader/bundle patch mechanism are unchanged, so no code migration is required. 0.1.3's headline changes (environment-proxy support, Session persistence rework) do not touch any service this plugin consumes. README requirements and bundle notes now reference `0.1.3-alpha.1`; tests ALL PASS. / **已在 deepseek-harness `0.1.3-alpha.1` 最新发行版上验证。** 自 `0.1.2-rc.1` 以来无缝接口变更：`ctx.llm.resolveModelInfo` 能力补丁 + `agent/pre-step` 消息改写仍为稳定集成点，`ctx.attachments.readImage` 在两个 tag 之间源码完全一致（0.1.3 新增的文件附件类型为纯增量，本插件不涉及）。内置 `@deepseek-ai/cordis` `4.0.2` 与 loader / bundle 补丁机制均未变化，无需代码迁移。0.1.3 的主要变更（环境代理支持、Session 持久化重构）均不涉及本插件消费的任何服务。README 环境要求与 bundle 说明现已引用 `0.1.3-alpha.1`；测试全部通过。
+
 ## [0.3.7] - 2026-09-03
 
 ### Compatibility / 兼容性
