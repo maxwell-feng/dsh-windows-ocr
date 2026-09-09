@@ -34,9 +34,16 @@ dsh plugin --profile web add github:maxwell-feng/dsh-windows-ocr
 > **npm install registers the `windows-ocr` row by itself.** The package ships
 > a bundle patch (`dsh.bundle` + its own `cordis.patch.yml`) that inserts the
 > `windows-ocr` loader entry. Do **not** also add a manual `- insert:` row with
-> the same id to your profile — dsh `0.1.3-alpha.1` (cordis-plugin-loader
+> the same id to your profile — dsh `0.1.5-alpha.1` (cordis-plugin-loader
 > `1.0.2`) rejects duplicate loader entry ids and `dsh web` fails to boot with
 > `duplicate loader entry id: windows-ocr`.
+
+## Documentation
+
+- [Configuration Guide](CONFIG.md) ([简体中文](CONFIG.zh.md))
+- [Update Guide](UPDATE.md) ([简体中文](UPDATE.zh.md))
+- [Uninstall Guide](UNINSTALL.md) ([简体中文](UNINSTALL.zh.md))
+- [Changelog](CHANGELOG.md)
 
 ## Quick install via an AI agent
 

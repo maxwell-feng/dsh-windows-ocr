@@ -31,7 +31,14 @@ dsh plugin --profile web add github:maxwell-feng/dsh-windows-ocr
 > 重建 `lib/`，并且 pnpm ≥ 10 需要一次性允许构建（它会打印确切的
 > `pnpm-workspace.yaml` 片段）。
 
-> **npm 安装会自行注册 `windows-ocr` 这一行。** 该包自带 bundle 补丁（`dsh.bundle` + 它自己的 `cordis.patch.yml`），已经插入了 `windows-ocr` 这个 loader 条目。请**不要**再往 profile 里手动 `- insert:` 一行同 id 的条目——dsh `0.1.3-alpha.1`会拒绝重复的 loader 条目 id，`dsh web` 会以 `duplicate loader entry id: windows-ocr` 启动失败。
+> **npm 安装会自行注册 `windows-ocr` 这一行。** 该包自带 bundle 补丁（`dsh.bundle` + 它自己的 `cordis.patch.yml`），已经插入了 `windows-ocr` 这个 loader 条目。请**不要**再往 profile 里手动 `- insert:` 一行同 id 的条目——dsh `0.1.5-alpha.1` 会拒绝重复的 loader 条目 id，`dsh web` 会以 `duplicate loader entry id: windows-ocr` 启动失败。
+
+## 文档导航
+
+- [配置说明文档](CONFIG.zh.md) ([English](CONFIG.md))
+- [更新说明文档](UPDATE.zh.md) ([English](UPDATE.md))
+- [卸载说明文档](UNINSTALL.zh.md) ([English](UNINSTALL.md))
+- [更新日志 (Changelog)](CHANGELOG.md)
 
 ## 让 AI agent 快速安装
 

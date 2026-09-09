@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0] - 2026-09-09
+
+### Compatibility / 兼容性
+
+- **DeepSeek Harness 0.1.5-alpha.1 compatibility verified**: Full regression verification passed on the latest DSH host (`0.1.5-alpha.1`).
+- **Documentation Standard Suite**: Added dedicated standalone `CONFIG.md`, `CONFIG.zh.md`, `UPDATE.md`, `UPDATE.zh.md`, `UNINSTALL.md`, and `UNINSTALL.zh.md`.
+- **Package Manifest**: Updated `package.json` files manifest to include all documentation assets.
+- **兼容性：已在 deepseek-harness 0.1.5-alpha.1 最新发布版上完成全面验证**：对齐最新的 host 接缝；补齐独立的配置说明、更新说明与卸载说明完整文档体系；更新 npm 与离线 tarball 发布清单。
+
 ## [0.3.8] - 2026-09-04
 
 ### Compatibility / 兼容性
