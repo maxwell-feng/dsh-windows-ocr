@@ -122,8 +122,8 @@ Then restart `dsh web`. Remove the rows to uninstall — the plugin restores the
 
 > Choose **one** way to load the plugin: the npm bundle (above) **or** this
 > manual insert — never both. Both register the same `windows-ocr` entry id,
-> and dsh `0.1.3-alpha.1` fails the boot with `duplicate loader entry id:
-> windows-ocr` when the row exists twice. If the row is already present (for
+> and dsh `0.1.5-alpha.1` fails the boot with `duplicate loader entry id: windows-ocr`
+> when the row exists twice. If the row is already present (for
 > example after an npm bundle install), configure it with an id-targeted
 > override (see Configuration below) instead of inserting a second row.
 
