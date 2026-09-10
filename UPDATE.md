@@ -2,7 +2,7 @@
 
 English | [简体中文](UPDATE.zh.md)
 
-> Verified against DeepSeek Harness **0.1.5-alpha.1**.
+> Verified against DeepSeek Harness **0.1.5-rc.1**.
 
 This document outlines how to upgrade `dsh-windows-ocr` to the latest release and verify compatibility.
 
@@ -16,7 +16,7 @@ dsh plugin --profile web update dsh-windows-ocr@latest
 ```
 or pin version:
 ```bash
-dsh plugin --profile web add dsh-windows-ocr@0.4.0
+dsh plugin --profile web add dsh-windows-ocr@0.5.0
 ```
 
 ### Upgrading via Git Checkout
@@ -33,7 +33,7 @@ dsh plugin --profile web add github:maxwell-feng/dsh-windows-ocr
 
 ### Upgrading via Tarball
 ```bash
-dsh plugin --profile web add ./dsh-windows-ocr-0.4.0.tgz
+dsh plugin --profile web add ./dsh-windows-ocr-0.5.0.tgz
 ```
 
 ---
@@ -48,5 +48,5 @@ In a text-only model session (e.g. DeepSeek-V3 / DeepSeek-R1), attach an image c
 
 To roll back:
 ```bash
-dsh plugin --profile web add dsh-windows-ocr@0.3.8
+dsh plugin --profile web add dsh-windows-ocr@0.4.0
 ```

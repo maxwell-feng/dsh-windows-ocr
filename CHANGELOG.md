@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.0] - 2026-09-10
+
+### Compatibility / 兼容性
+
+- **DeepSeek Harness 0.1.5-rc.1 compatibility verified**: the `ctx.llm.resolveModelInfo` / `listModels` capability shim, the `agent/pre-step` message rewrite (`PreStepDecision`), and `ctx.attachments.readImage` are source-identical between `0.1.5-alpha.1` and `0.1.5-rc.1` (rc.1's `llm` change is one additive provider-diagnostic field that this plugin never reads); the vendored `@deepseek-ai/cordis` `4.0.2` and `@deepseek-ai/schemastery` `3.18.2` are unchanged, so no plugin code migration is required. Node.js floor rises to `>=22` (aligned with the harness root engines). Tests ALL PASS. / **已在 deepseek-harness `0.1.5-rc.1` 上验证兼容**：`ctx.llm.resolveModelInfo` / `listModels` 能力补丁、`agent/pre-step` 消息改写（含 `PreStepDecision`）以及 `ctx.attachments.readImage` 在 `0.1.5-alpha.1` 与 `0.1.5-rc.1` 之间源码完全一致（rc.1 对 `llm` 的改动只是一个本插件不读取的增量 provider 诊断字段）；内置 `@deepseek-ai/cordis` `4.0.2` 与 `@deepseek-ai/schemastery` `3.18.2` 均未变化，无需插件代码迁移。Node.js 下限升至 `>=22`（与 harness 根 engines 对齐）。测试全部通过。
+
+### Documentation / 文档
+
+- **Bilingual doc suite completed**: renamed `README.zh-CN.md` → `README.zh.md` (uniform `.zh.md` suffix), added standalone `INSTALL.md` / `INSTALL.zh.md` and `USAGE.md` / `USAGE.zh.md`, and refreshed the README / CONFIG / UPDATE / UNINSTALL pairs for `0.5.0` / `0.1.5-rc.1`. / **补齐双语文档体系**：`README.zh-CN.md` 重命名为 `README.zh.md`（统一 `.zh.md` 后缀），新增独立的 `INSTALL.md` / `INSTALL.zh.md` 与 `USAGE.md` / `USAGE.zh.md`，README / CONFIG / UPDATE / UNINSTALL 成对文档同步至 `0.5.0` / `0.1.5-rc.1`。
+
 ## [0.4.0] - 2026-09-09
 
 ### Compatibility / 兼容性

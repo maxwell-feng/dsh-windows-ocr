@@ -2,7 +2,7 @@
 
 [English](UPDATE.md) | 简体中文
 
-> 本版本已在 DeepSeek Harness **0.1.5-alpha.1** 最新发布版本上全面验证。
+> 本版本已在 DeepSeek Harness **0.1.5-rc.1** 最新发布版本上全面验证。
 
 本文档介绍如何将 **dsh-windows-ocr** 插件升级至最新版本。
 
@@ -16,7 +16,7 @@ dsh plugin --profile web update dsh-windows-ocr@latest
 ```
 或指定版本：
 ```bash
-dsh plugin --profile web add dsh-windows-ocr@0.4.0
+dsh plugin --profile web add dsh-windows-ocr@0.5.0
 ```
 
 ### 从 Git 仓库升级
@@ -33,7 +33,7 @@ dsh plugin --profile web add github:maxwell-feng/dsh-windows-ocr
 
 ### 从 Tarball 升级
 ```bash
-dsh plugin --profile web add ./dsh-windows-ocr-0.4.0.tgz
+dsh plugin --profile web add ./dsh-windows-ocr-0.5.0.tgz
 ```
 
 ---
@@ -48,5 +48,5 @@ dsh web
 
 若需回滚至上一版本：
 ```bash
-dsh plugin --profile web add dsh-windows-ocr@0.3.8
+dsh plugin --profile web add dsh-windows-ocr@0.4.0
 ```

@@ -13,7 +13,7 @@
 | `language` | `string` | `""` | OCR 识别语言标记（如 `"zh-Hans-CN"`, `"en-US"`）。留空表示自动使用 Windows 系统首选语言。 |
 | `passthrough` | `boolean` | `false` | **视觉模型原图透传开关**。默认为 `false`（所有附件图片均强制在本地进行 OCR 转换，文本发往模型，保护隐私）；设为 `true` 时，原生支持图像的视觉模型将接收原始图片字节，纯文本模型依然自动 OCR。 |
 | `timeoutMs` | `number` | `60000` | 单张图片 OCR 处理的最长等待超时时间（毫秒）。超时后将自动终止进程并清理临时文件。 |
-| `maxCacheEntries` | `number` | `200` | 内存中 OCR 结果的 LRU 缓存条目上限，避免在多轮对话中重复识别相同图片。 |
+| `maxCacheEntries` | `number` | `200` | 内存中 OCR 结果的缓存条目上限（按附件 id 索引，避免在多轮对话中重复识别相同图片；超限时淘汰最早条目）。 |
 | `ocrScript` | `string` | 内置 `ocr.ps1` | Windows Media OCR 底层 PowerShell 驱动脚本路径，一般无需更改。 |
 
 ---
