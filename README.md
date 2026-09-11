@@ -25,7 +25,7 @@ or from the repository / a tarball:
 
 ```bash
 dsh plugin --profile web add ./dsh-windows-ocr        # source checkout
-dsh plugin --profile web add ./dsh-windows-ocr-0.6.0.tgz
+dsh plugin --profile web add ./dsh-windows-ocr-0.7.0.tgz
 dsh plugin --profile web add github:maxwell-feng/dsh-windows-ocr
 ```
 
