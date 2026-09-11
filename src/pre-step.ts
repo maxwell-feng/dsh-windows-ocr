@@ -1,6 +1,6 @@
-import { MISSING_ATTACHMENT_TEXT } from "./config.js";
-import type { WindowsOcrEngine } from "./ocr-engine.js";
-import type { AgentLike, AgentRoute, ContentBlock, MessageLike } from "./types.js";
+import { MISSING_ATTACHMENT_TEXT } from "./config.ts";
+import type { WindowsOcrEngine } from "./ocr-engine.ts";
+import type { AgentLike, AgentRoute, ContentBlock, MessageLike } from "./types.ts";
 
 export function hasImageBlock(content: ContentBlock[] | undefined): boolean {
   return (

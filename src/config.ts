@@ -1,6 +1,6 @@
 import Schema from "@deepseek-ai/schemastery";
 import { fileURLToPath } from "node:url";
-import type { Config as PluginConfig } from "./types.js";
+import type { Config as PluginConfig } from "./types.ts";
 
 export const EXT_BY_MEDIA: Record<string, string> = {
   "image/png": "png",

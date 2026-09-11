@@ -23,7 +23,7 @@ Prebuilt and published with Sigstore provenance — no source build or
 ### From a release tarball (offline)
 
 ```bash
-dsh plugin --profile web add ./dsh-windows-ocr-0.7.0.tgz
+dsh plugin --profile web add ./dsh-windows-ocr-0.8.0.tgz
 ```
 
 The tarball is attached to each GitHub release.
