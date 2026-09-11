@@ -2,7 +2,7 @@
 
 [English](INSTALL.md) | 简体中文
 
-> 本版本已在 DeepSeek Harness **0.1.5-rc.1** 上验证。需要 Windows 10/11。
+> 本版本已在 DeepSeek Harness **0.1.5-rc.2** 上验证。需要 Windows 10/11。
 > 从源码构建需要 Node.js **>=22**。
 
 ---
@@ -22,7 +22,7 @@ dsh plugin --profile web add dsh-windows-ocr
 ### 从 release tarball 安装（离线）
 
 ```bash
-dsh plugin --profile web add ./dsh-windows-ocr-0.5.0.tgz
+dsh plugin --profile web add ./dsh-windows-ocr-0.6.0.tgz
 ```
 
 每个 GitHub release 都附带对应版本的 tarball。
@@ -49,7 +49,7 @@ dsh plugin --profile web add ./dsh-windows-ocr
 > **npm 安装会自行注册 `windows-ocr` 这一行。** 该包自带 bundle 补丁
 > （`dsh.bundle` + 它自己的 `cordis.patch.yml`），已经插入了 `windows-ocr`
 > 这个 loader 条目。请**不要**再往 profile 里手动 `- insert:` 一行同 id
-> 的条目——dsh `0.1.5-rc.1` 会拒绝重复的 loader 条目 id，`dsh web` 会以
+> 的条目——dsh `0.1.5-rc.2` 会拒绝重复的 loader 条目 id，`dsh web` 会以
 > `duplicate loader entry id: windows-ocr` 启动失败。
 
 ---
