@@ -1,19 +1,16 @@
 # Changelog
 
-## [0.7.0] - 2026-09-11
+## [0.8.0] - 2026-09-11
 
 ### Changed / 变更
 
-- **Modular TypeScript Architecture Refactoring / 模块化 TypeScript 架构重构**:
-  - Refactored monolithic codebase into dedicated TypeScript modules following the official DeepSeek Harness plugin development guide.
-  - Separated public types and Cordis event declarations into `src/types.ts`.
-  - Extracted Schemastery validation into `src/config.ts`.
-  - Extracted temp directory lifecycle, orphan sweep, and process tree termination into `src/temp-cleanup.ts`.
-  - Extracted LLM capability shims into `src/capability-shim.ts`.
-  - Extracted OCR execution and cache management into `src/ocr-engine.ts`.
-  - Extracted agent message inspection and rewriting into `src/pre-step.ts`.
-  - Exported unified plugin entry from `src/index.ts` with backward-compatible API.
-  - Recompiled and verified all 16 pipeline tests pass.
+- **Pure TypeScript Architecture Refactoring (Zero JavaScript) / 纯 TypeScript 架构重构（无 JavaScript 残留）**:
+  - Fully refactored into a pure TypeScript codebase following official DeepSeek Harness plugin development guidelines.
+  - Completely removed all legacy `.mjs` / `.js` files from repository tracking and test runners.
+  - Converted the entire test suite into pure TypeScript (`test/standalone-test.test.ts`), executed natively using Node `--experimental-strip-types`.
+  - Configured modern `allowImportingTsExtensions` and `rewriteRelativeImportExtensions` with dual `tsconfig.json` (strip-types runtime) and `tsconfig.build.json` (distribution compilation).
+  - Cleanly modularized responsibilities: `src/types.ts`, `src/config.ts`, `src/temp-cleanup.ts`, `src/capability-shim.ts`, `src/ocr-engine.ts`, `src/pre-step.ts`, and `src/index.ts`.
+  - Verified 100% test pass rate.
 
 ## [0.6.0] - 2026-09-11
 

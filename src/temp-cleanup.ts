@@ -2,7 +2,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { lstatSync, readdirSync, promises as fs, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { TEMP_PREFIX } from "./config.js";
+import { TEMP_PREFIX } from "./config.ts";
 
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));

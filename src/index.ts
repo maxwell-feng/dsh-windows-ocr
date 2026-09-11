@@ -5,23 +5,23 @@
 // and send only the recognized text to the model.
 
 import type { Context } from "@deepseek-ai/cordis";
-import { installCapabilityShim } from "./capability-shim.js";
-import { Config, DEFAULT_OCR_SCRIPT } from "./config.js";
-import { WindowsOcrEngine } from "./ocr-engine.js";
-import { rewriteMessages } from "./pre-step.js";
-import { sweepOrphanTempDirs } from "./temp-cleanup.js";
-import type { AttachmentStore, Config as PluginConfig, LlmService } from "./types.js";
+import { installCapabilityShim } from "./capability-shim.ts";
+import { Config, DEFAULT_OCR_SCRIPT } from "./config.ts";
+import { WindowsOcrEngine } from "./ocr-engine.ts";
+import { rewriteMessages } from "./pre-step.ts";
+import { sweepOrphanTempDirs } from "./temp-cleanup.ts";
+import type { AttachmentStore, Config as PluginConfig, LlmService } from "./types.ts";
 
 export const name = "windows-ocr";
 
 export const inject = ["llm", "attachments"];
 
-export { Config, DEFAULT_OCR_SCRIPT, EXT_BY_MEDIA, MISSING_ATTACHMENT_TEXT, TEMP_PREFIX } from "./config.js";
-export { installCapabilityShim } from "./capability-shim.js";
-export { WindowsOcrEngine } from "./ocr-engine.js";
-export { currentRoute, hasImageBlock, rewriteContent, rewriteMessages } from "./pre-step.js";
-export { removeTempDir, sleep, sweepOrphanTempDirs, terminateChild } from "./temp-cleanup.js";
-export * from "./types.js";
+export { Config, DEFAULT_OCR_SCRIPT, EXT_BY_MEDIA, MISSING_ATTACHMENT_TEXT, TEMP_PREFIX } from "./config.ts";
+export { installCapabilityShim } from "./capability-shim.ts";
+export { WindowsOcrEngine } from "./ocr-engine.ts";
+export { currentRoute, hasImageBlock, rewriteContent, rewriteMessages } from "./pre-step.ts";
+export { removeTempDir, sleep, sweepOrphanTempDirs, terminateChild } from "./temp-cleanup.ts";
+export * from "./types.ts";
 
 export function apply(ctx: Context, config: PluginConfig = {}): void {
   const language = typeof config.language === "string" ? config.language : "";

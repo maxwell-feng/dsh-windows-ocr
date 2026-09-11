@@ -1,4 +1,4 @@
-import type { LlmService } from "./types.js";
+import type { LlmService } from "./types.ts";
 
 export interface CapabilityShimHandle {
   nativeImageSupport(provider: string, model: string): Promise<boolean>;
