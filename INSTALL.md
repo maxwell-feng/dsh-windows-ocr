@@ -2,7 +2,7 @@
 
 English | [简体中文](INSTALL.zh.md)
 
-> Verified against DeepSeek Harness **0.1.5-rc.1**. Requires Windows 10/11.
+> Verified against DeepSeek Harness **0.1.5-rc.2**. Requires Windows 10/11.
 > Source builds require Node.js **>=22**.
 
 ---
@@ -23,7 +23,7 @@ Prebuilt and published with Sigstore provenance — no source build or
 ### From a release tarball (offline)
 
 ```bash
-dsh plugin --profile web add ./dsh-windows-ocr-0.5.0.tgz
+dsh plugin --profile web add ./dsh-windows-ocr-0.6.0.tgz
 ```
 
 The tarball is attached to each GitHub release.
@@ -50,7 +50,7 @@ dsh plugin --profile web add ./dsh-windows-ocr
 > **npm install registers the `windows-ocr` row by itself.** The package ships
 > a bundle patch (`dsh.bundle` + its own `cordis.patch.yml`) that inserts the
 > `windows-ocr` loader entry. Do **not** also add a manual `- insert:` row with
-> the same id to your profile — dsh `0.1.5-rc.1` rejects duplicate loader entry
+> the same id to your profile — dsh `0.1.5-rc.2` rejects duplicate loader entry
 > ids and `dsh web` fails to boot with
 > `duplicate loader entry id: windows-ocr`.
 

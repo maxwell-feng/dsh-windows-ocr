@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0] - 2026-09-11
+
+### Compatibility / 兼容性
+
+- **DeepSeek Harness 0.1.5-rc.2 compatibility verified & manifest modernization / 适配 DeepSeek Harness 0.1.5-rc.2 与清单规范现代化**:
+  - Added `manifestVersion: 1` under `package.json.dsh` conforming to `@deepseek-ai/dsh-package-manifest`.
+  - Added explicit host engine compatibility in `package.json.engines`: `"dsh": "^0.1.5-rc.2"`.
+  - Declared peerDependencies for `@deepseek-ai/dsh-attachment` and `@deepseek-ai/dsh-llm` at `^0.1.5-rc.2`.
+  - Refreshed all bilingual documentation (`README.md`, `README.zh.md`, `INSTALL.md`, `INSTALL.zh.md`, `UPDATE.md`, `UPDATE.zh.md`, `USAGE.md`, `USAGE.zh.md`, `CONFIG.md`, `CONFIG.zh.md`, `UNINSTALL.md`, `UNINSTALL.zh.md`) for `0.1.5-rc.2` verification.
+
 ## [0.5.0] - 2026-09-10
 
 ### Compatibility / 兼容性
