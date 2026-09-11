@@ -16,7 +16,7 @@ dsh plugin --profile web update dsh-windows-ocr@latest
 ```
 or pin version:
 ```bash
-dsh plugin --profile web add dsh-windows-ocr@0.6.0
+dsh plugin --profile web add dsh-windows-ocr@0.7.0
 ```
 
 ### Upgrading via Git Checkout
@@ -33,7 +33,7 @@ dsh plugin --profile web add github:maxwell-feng/dsh-windows-ocr
 
 ### Upgrading via Tarball
 ```bash
-dsh plugin --profile web add ./dsh-windows-ocr-0.6.0.tgz
+dsh plugin --profile web add ./dsh-windows-ocr-0.7.0.tgz
 ```
 
 ---

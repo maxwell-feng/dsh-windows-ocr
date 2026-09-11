@@ -22,7 +22,7 @@ dsh plugin --profile web add dsh-windows-ocr
 ### 从 release tarball 安装（离线）
 
 ```bash
-dsh plugin --profile web add ./dsh-windows-ocr-0.6.0.tgz
+dsh plugin --profile web add ./dsh-windows-ocr-0.7.0.tgz
 ```
 
 每个 GitHub release 都附带对应版本的 tarball。
