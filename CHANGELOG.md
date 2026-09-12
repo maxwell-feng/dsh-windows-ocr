@@ -1,5 +1,7 @@
 # Changelog
 
+All notable changes to this project are documented in this file.
+
 ## [0.8.0] - 2026-09-11
 
 ### Changed / 变更
@@ -11,6 +13,21 @@
   - Configured modern `allowImportingTsExtensions` and `rewriteRelativeImportExtensions` with dual `tsconfig.json` (strip-types runtime) and `tsconfig.build.json` (distribution compilation).
   - Cleanly modularized responsibilities: `src/types.ts`, `src/config.ts`, `src/temp-cleanup.ts`, `src/capability-shim.ts`, `src/ocr-engine.ts`, `src/pre-step.ts`, and `src/index.ts`.
   - Verified 100% test pass rate.
+
+## [0.7.0] - 2026-09-11
+
+### Changed / 变更
+
+- **Modular TypeScript Architecture Refactoring / 模块化 TypeScript 架构重构**:
+  - Refactored monolithic codebase into dedicated TypeScript modules following the official DeepSeek Harness plugin development guide.
+  - Separated public types and Cordis event declarations into `src/types.ts`.
+  - Extracted Schemastery validation into `src/config.ts`.
+  - Extracted temp directory lifecycle, orphan sweep, and process tree termination into `src/temp-cleanup.ts`.
+  - Extracted LLM capability shims into `src/capability-shim.ts`.
+  - Extracted OCR execution and cache management into `src/ocr-engine.ts`.
+  - Extracted agent message inspection and rewriting into `src/pre-step.ts`.
+  - Exported unified plugin entry from `src/index.ts` with backward-compatible API.
+  - Recompiled and verified all 16 pipeline tests pass.
 
 ## [0.6.0] - 2026-09-11
 
@@ -64,6 +81,27 @@
 ### Compatibility / 兼容性
 
 - **Verified against deepseek-harness `0.1.2-alpha.4` (latest `master`).** No seam changes since `0.1.2-alpha.3` (`ctx.llm.resolveModelInfo` shim + `agent/pre-step` rewrite remain the stable integration points). Bumped tarball reference to `0.3.5` and completed bilingual six-section coverage (Release / Changelog / Install / Uninstall / Usage / Config). No code migration required. / **已在 deepseek-harness `0.1.2-alpha.4` 最新 `master` 上验证。** 自 `0.1.2-alpha.3` 以来无缝接口变更（`ctx.llm.resolveModelInfo` 能力补丁 + `agent/pre-step` 改写仍为稳定集成点）。安装包引用升级至 `0.3.5`，并补齐双语六项覆盖（发行版 / 更新说明 / 安装 / 卸载 / 使用 / 配置）。无需代码迁移。
+
+## [0.3.4] - 2026-09-01
+
+### Compatibility / 兼容性
+
+- **Adapted to deepseek-harness `0.1.2-alpha.3` (master)**: between `0.1.2-alpha.2`
+  and `0.1.2-alpha.3` the `agent/pre-step` waterfall payload and `PreStepDecision`,
+  the `resolveModelInfo` / `listModels` capability shim, and `attachments.readImage`
+  are unchanged — the alpha.3 diff in `packages/core/agent-loop` is tests/docs
+  only, and `packages/attachment` merely adds an `admitPromptContent` helper — so
+  no plugin code changes were required. `@deepseek-ai/cordis` stays at `4.0.2` and
+  `@deepseek-ai/schemastery` stays at `3.18.2` (the pins the alpha.3 checkout
+  builds against). `lib/` is rebuilt; the standalone OCR smoke test still passes.
+- **适配 deepseek-harness `0.1.2-alpha.3`（master）**：从 `0.1.2-alpha.2`
+  到 `0.1.2-alpha.3`，`agent/pre-step` 瀑布事件的载荷与 `PreStepDecision`、
+  `resolveModelInfo` / `listModels` 能力 shim 以及 `attachments.readImage`
+  均无变化——alpha.3 在 `packages/core/agent-loop` 的差异仅为测试/文档，
+  `packages/attachment` 只新增了 `admitPromptContent` 帮助函数——因此无需改动
+  插件代码。`@deepseek-ai/cordis` 保持 `4.0.2`，`@deepseek-ai/schemastery`
+  保持 `3.18.2`（与 alpha.3 检出构建所用的锁定版本一致）。已重建 `lib/`；
+  OCR 独立冒烟测试仍然通过。
 
 ## [0.3.3] - 2026-08-31
 
@@ -129,7 +167,37 @@
   (`prepend`), replacing the `llm/adapters-updated` re-wrap machinery; the
   standalone test drives the rewrite through the pre-step seam.
 
-All notable changes to this project are documented in this file.
+## [0.2.6] - 2026-08-21
+
+### Compatibility
+
+- **Adapted to deepseek-harness `0.1.1-rc.2`**: plugin code verified against
+  the rc.2 `llm` service (`resolveModelInfo` / `listModels` /
+  `adapter.stream` / `llm/adapters-updated`) and `attachments` service
+  (`readImage`) — unchanged from rc.1, as is the vendored cordis (`4.0.1`) —
+  no code changes required. Configuration and install docs now target
+  `0.1.1-rc.2`.
+- rc.2 verification: the streaming call path still funnels through
+  `registration.adapter.stream` (the single choke point this plugin wraps), so
+  attached image blocks are still rewritten to OCR text before any bytes reach
+  the wire; `resolveModelInfo` / `listModels` still expose `inputModalities`,
+  and `readImage` still returns `{ ref, data }`.
+
+## [0.2.5] - 2026-08-21
+
+### Compatibility
+
+- **Adapted to deepseek-harness `0.1.1-rc.1`**: plugin code verified against
+  the rc.1 `llm` service (`resolveModelInfo` / `listModels` /
+  `adapter.stream` / `llm/adapters-updated`) and `attachments` service
+  (`readImage`) — unchanged from rc.8, as is the vendored cordis (`4.0.1`) —
+  no code changes required. Configuration and install docs now target
+  `0.1.1-rc.1`.
+- rc.1 verification: the streaming call path still funnels through
+  `registration.adapter.stream` (the single choke point this plugin wraps), so
+  attached image blocks are still rewritten to OCR text before any bytes reach
+  the wire; `resolveModelInfo` / `listModels` still expose `inputModalities`,
+  and `readImage` still returns `{ ref, data }`.
 
 ## [0.2.4] - 2026-08-20
 
