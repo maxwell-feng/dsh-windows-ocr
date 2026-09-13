@@ -2,6 +2,8 @@
 
 [English](UNINSTALL.md) | 简体中文
 
+> 已在 DeepSeek Harness **0.1.5-rc.2** 上随 `dsh-windows-ocr` **0.8.1** 完成全面验证。
+
 本文档指导如何从 DeepSeek Harness 的指定 Profile 中完整卸载 **dsh-windows-ocr** 插件。
 
 ---
