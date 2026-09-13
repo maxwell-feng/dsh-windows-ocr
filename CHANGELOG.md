@@ -1,6 +1,18 @@
 # Changelog
 
+English | [中文](CHANGELOG.zh.md)
+
 All notable changes to this project are documented in this file.
+
+## [0.8.1] - 2026-09-13
+
+### Removed / 移除
+
+- **Removed Dead Repository Artifacts / 清理死产物与冗余文件**:
+  - Removed committed legacy tarballs (`dsh-windows-ocr-0.4.0.tgz`, `dsh-windows-ocr-0.5.0.tgz`, `dsh-windows-ocr-0.6.0.tgz`) and redundant `package-lock.json` from git tracking. / 从版本库追踪中彻底移除了遗留的历史 tarball 产物包（0.4.0、0.5.0、0.6.0）以及多余的 `package-lock.json`。
+- **Documentation & Harness 0.1.5-rc.2 Synchronization / 文档与 0.1.5-rc.2 同步**:
+  - Refreshed all bilingual documentation (`INSTALL.md`, `INSTALL.zh.md`, `UPDATE.md`, `UPDATE.zh.md`, `USAGE.md`, `USAGE.zh.md`, `CONFIG.md`, `CONFIG.zh.md`, `UNINSTALL.md`, `UNINSTALL.zh.md`, `README.md`, `README.zh.md`), ensuring explicit verification against DeepSeek Harness `0.1.5-rc.2`. / 全面更新双语文档体系，确保所有文档明确标明在 DeepSeek Harness `0.1.5-rc.2` 上完成验证。
+  - Added standalone `CHANGELOG.zh.md`. / 补充独立的中文更新日志。
 
 ## [0.8.0] - 2026-09-11
 

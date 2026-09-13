@@ -2,6 +2,8 @@
 
 English | [简体中文](CONFIG.zh.md)
 
+> Verified against DeepSeek Harness **0.1.5-rc.2** with `dsh-windows-ocr` **0.8.1**.
+
 This document describes all configuration options, type contracts, and defaults for `dsh-windows-ocr`.
 
 ---
